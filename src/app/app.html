@@ -1,0 +1,16 @@
+<div class="h-screen flex flex-col bg-gray-50">
+  <!-- Header Bar -->
+  <app-header-bar class="flex-shrink-0" />
+
+  <!-- Split View Content -->
+  <app-split-view class="flex-1 overflow-hidden">
+    <!-- Chat Panel Slot -->
+    <app-chat-panel slot="chat" class="h-full block" />
+
+    <!-- Canvas Panel Slot -->
+    <app-canvas-panel slot="canvas" class="h-full block" />
+  </app-split-view>
+
+  <!-- Mobile Toggle -->
+  <app-mobile-toggle (viewChanged)="onMobileViewChanged($event)" />
+</div>

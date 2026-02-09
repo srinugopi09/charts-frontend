@@ -1,0 +1,29 @@
+/* A2UI-specific theme and component styles */
+
+/* A2UI component container */
+.a2ui-container {
+  @apply w-full h-full;
+}
+
+/* A2UI chart wrapper */
+.a2ui-chart {
+  @apply w-full h-full flex items-center justify-center;
+}
+
+/* A2UI error fallback */
+.a2ui-error {
+  @apply p-4 border border-red-300 rounded-lg bg-red-50;
+}
+
+.a2ui-error-title {
+  @apply text-red-800 font-semibold mb-2;
+}
+
+.a2ui-error-message {
+  @apply text-red-600 text-sm;
+}
+
+/* A2UI loading state */
+.a2ui-loading {
+  @apply animate-pulse bg-gray-200 rounded;
+}
