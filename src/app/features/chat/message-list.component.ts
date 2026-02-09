@@ -1,7 +1,6 @@
-import { Component, inject, output, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../core/services/chat-state.service';
-import { A2UIEventService } from '../../core/services/a2ui-event.service';
 import { AutoScrollDirective } from '../../shared/directives/auto-scroll.directive';
 import { MessageBubbleComponent } from './message-bubble.component';
 import { ChatMessage } from '../../core/models/chat.models';
@@ -57,7 +56,6 @@ import { ChatMessage } from '../../core/models/chat.models';
 })
 export class MessageListComponent {
   protected chatState = inject(ChatStateService);
-  private a2uiEventService = inject(A2UIEventService);
 
   // Direct signal reference - NOT a copy
   protected readonly messages = this.chatState.messages;
@@ -68,9 +66,9 @@ export class MessageListComponent {
   /**
    * Handle chart thumbnail click - update canvas with visualization
    */
-  protected handleViewCanvas(message: ChatMessage): void {
-    if (message.a2uiPayload) {
-      this.a2uiEventService.handleA2UISurface(message.a2uiPayload);
-    }
+  protected handleViewCanvas(_message: ChatMessage): void {
+    // TODO: Re-display cached surface when clicking chat thumbnail.
+    // Requires storing surfaceId on ChatMessage and calling
+    // a2uiEventService.currentSurfaceId.set(surfaceId).
   }
 }

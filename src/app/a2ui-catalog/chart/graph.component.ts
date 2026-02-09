@@ -79,6 +79,14 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
     return this.getProp<string>('yLabel');
   }
 
+  get valuePrefix(): string {
+    return this.getProp<string>('valuePrefix', '')!;
+  }
+
+  get valueSuffix(): string {
+    return this.getProp<string>('valueSuffix', '')!;
+  }
+
   get interactive(): boolean {
     if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) return false;
     return this.getProp<boolean>('interactive', true)!;
@@ -611,12 +619,16 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
    * Format large numbers compactly: 44500000 → "$44.5M"
    */
   private formatCompactValue(value: number): string {
+    const prefix = this.valuePrefix;
+    const suffix = this.valueSuffix;
     const abs = Math.abs(value);
     const sign = value < 0 ? '-' : '';
-    if (abs >= 1_000_000_000) return `${sign}$${(abs / 1_000_000_000).toFixed(1)}B`;
-    if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(1)}M`;
-    if (abs >= 1_000) return `${sign}$${(abs / 1_000).toFixed(1)}K`;
-    return `${sign}$${abs}`;
+    let compact: string;
+    if (abs >= 1_000_000_000) compact = `${(abs / 1_000_000_000).toFixed(1)}B`;
+    else if (abs >= 1_000_000) compact = `${(abs / 1_000_000).toFixed(1)}M`;
+    else if (abs >= 1_000) compact = `${(abs / 1_000).toFixed(1)}K`;
+    else compact = `${abs}`;
+    return `${sign}${prefix}${compact}${suffix}`;
   }
 
   private hexToRgb(hex: string): { r: number; g: number; b: number } {
