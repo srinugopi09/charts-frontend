@@ -19,8 +19,11 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <!-- Tablet/Mobile tab bar (hidden on desktop) -->
-    <div class="lg:hidden border-b border-gray-200 flex flex-shrink-0 bg-white">
+    <div class="lg:hidden border-b border-gray-200 flex flex-shrink-0 bg-white" role="tablist">
       <button
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'chat'"
+        aria-controls="panel-chat"
         (click)="activeTab.set('chat')"
         class="flex-1 px-6 py-3 text-sm font-medium transition-colors relative"
         [class.text-blue-600]="activeTab() === 'chat'"
@@ -31,6 +34,9 @@ import { CommonModule } from '@angular/common';
         }
       </button>
       <button
+        role="tab"
+        [attr.aria-selected]="activeTab() === 'canvas'"
+        aria-controls="panel-canvas"
         (click)="activeTab.set('canvas')"
         class="flex-1 px-6 py-3 text-sm font-medium transition-colors relative"
         [class.text-blue-600]="activeTab() === 'canvas'"
@@ -46,6 +52,8 @@ import { CommonModule } from '@angular/common';
     <div #desktopContainer class="flex-1 flex overflow-hidden">
       <!-- Chat panel -->
       <div
+        id="panel-chat"
+        role="tabpanel"
         [attr.data-panel]="'chat'"
         [attr.data-active]="activeTab() === 'chat'"
         [style.width.%]="chatWidth()"
@@ -55,6 +63,9 @@ import { CommonModule } from '@angular/common';
 
       <!-- Draggable divider (desktop only) -->
       <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize panels"
         (pointerdown)="onDividerPointerDown($event)"
         class="hidden lg:flex w-1.5 flex-shrink-0 bg-gray-200 cursor-col-resize hover:bg-blue-400 transition-colors relative z-10 items-center justify-center"
         [class.bg-blue-500]="isDragging()"
@@ -71,6 +82,8 @@ import { CommonModule } from '@angular/common';
 
       <!-- Canvas panel -->
       <div
+        id="panel-canvas"
+        role="tabpanel"
         [attr.data-panel]="'canvas'"
         [attr.data-active]="activeTab() === 'canvas'"
         class="h-full overflow-hidden flex flex-col min-w-0 flex-1 panel-wrapper">

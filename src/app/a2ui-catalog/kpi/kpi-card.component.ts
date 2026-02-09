@@ -23,6 +23,10 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
   template: `
     <div
       (click)="handleClick()"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="handleClick()"
+      [attr.aria-label]="label + ': ' + formattedValue"
       [class]="containerClasses">
       <!-- Label -->
       <div [class]="isModern ? 'text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3' : 'text-sm font-medium text-gray-600 mb-2'">

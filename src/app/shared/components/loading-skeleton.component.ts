@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [style.height]="height" class="w-full">
+    <div [style.height]="height" class="w-full" role="status" aria-label="Loading content">
       @if (type === 'chart') {
         <!-- Chart skeleton with modern shimmer effect -->
         <div class="space-y-4 animate-fadeIn">

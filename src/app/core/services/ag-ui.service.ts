@@ -23,6 +23,8 @@ export class AgUiService {
   private a2uiEventService = inject(A2UIEventService);
 
   private agent: HttpAgent;
+  private streamTimeout: ReturnType<typeof setTimeout> | null = null;
+  private readonly STREAM_TIMEOUT_MS = 60_000; // 60 seconds
 
   constructor() {
     // Initialize the HttpAgent with backend endpoint and thread ID
@@ -46,6 +48,7 @@ export class AgUiService {
         initialMessages: this.chatState
           .messages()
           .filter((msg) => msg.role === 'user')
+          .slice(-environment.maxMessageHistory)
           .map((msg, index) => ({
             id: msg.id || `msg-${index}`,
             role: 'user' as const,
@@ -56,6 +59,13 @@ export class AgUiService {
 
       // Start streaming
       this.chatState.isStreaming.set(true);
+
+      // Set stream timeout to prevent infinite hangs
+      this.streamTimeout = setTimeout(() => {
+        console.warn(`Agent stream timeout after ${this.STREAM_TIMEOUT_MS / 1000}s, aborting`);
+        this.cancel();
+        this.chatState.setError('Agent response timed out — please try again');
+      }, this.STREAM_TIMEOUT_MS);
 
       // Run agent with subscriber for events
       await this.agent.runAgent(
@@ -70,6 +80,7 @@ export class AgUiService {
             this.handleEvent(event);
           },
           onRunFailed: ({ error }) => {
+            this.clearStreamTimeout();
             // Suppress noisy AGUIError when library sends RUN_FINISHED after RUN_ERROR
             const msg = error?.message || '';
             if (msg.includes('The run has already errored')) {
@@ -80,6 +91,7 @@ export class AgUiService {
             this.chatState.isStreaming.set(false);
           },
           onRunFinalized: () => {
+            this.clearStreamTimeout();
             console.log('Agent stream complete');
             this.chatState.finalizeStreamingMessage();
             this.chatState.isStreaming.set(false);
@@ -87,6 +99,7 @@ export class AgUiService {
         }
       );
     } catch (error: any) {
+      this.clearStreamTimeout();
       // Suppress noisy AGUIError when library sends RUN_FINISHED after RUN_ERROR
       const msg = error?.message || '';
       if (msg.includes('The run has already errored')) {
@@ -95,6 +108,16 @@ export class AgUiService {
       console.error('Agent error:', error);
       this.chatState.setError(msg || 'Failed to connect to agent');
       this.chatState.isStreaming.set(false);
+    }
+  }
+
+  /**
+   * Clear the stream timeout if active
+   */
+  private clearStreamTimeout(): void {
+    if (this.streamTimeout) {
+      clearTimeout(this.streamTimeout);
+      this.streamTimeout = null;
     }
   }
 
@@ -243,6 +266,10 @@ export class AgUiService {
         break;
 
       case 'RUN_ERROR':
+        // Finalize any in-progress streaming message before setting error
+        if (this.chatState.currentStreamingMessage()) {
+          this.chatState.finalizeStreamingMessage();
+        }
         const errorMessage =
           'error' in event && typeof event['error'] === 'string'
             ? event['error']

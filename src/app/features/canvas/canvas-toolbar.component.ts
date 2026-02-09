@@ -86,7 +86,6 @@ export class CanvasToolbarComponent {
   readonly title = input<string>('');
 
   protected readonly isFullscreen = signal<boolean>(false);
-  protected readonly showHistory = signal<boolean>(false);
 
   /**
    * Toggle fullscreen mode

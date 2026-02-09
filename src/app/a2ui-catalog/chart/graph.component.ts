@@ -4,11 +4,10 @@ import {
   ViewChild,
   AfterViewInit,
   OnDestroy,
-  inject,
+  effect,
 } from '@angular/core';
 import { Chart, ChartConfiguration, ChartType as ChartJsType } from 'chart.js/auto';
 import { CatalogBaseComponent } from '../catalog-base.component';
-import { ChartAdapterService } from '../../core/services/chart-adapter.service';
 import { ChartType, ChartData } from '../../core/models/a2ui.models';
 import { FEATURE_FLAGS } from '../../core/config/feature-flags';
 
@@ -35,7 +34,7 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
         <h3 [class]="titleClass">{{ title }}</h3>
       }
       <div class="relative w-full flex-1 min-h-0">
-        <canvas #chartCanvas></canvas>
+        <canvas #chartCanvas role="img" [attr.aria-label]="'Chart: ' + (title || graphType || 'visualization')"></canvas>
       </div>
     </div>
   `,
@@ -43,8 +42,21 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
 export class GraphComponent extends CatalogBaseComponent implements AfterViewInit, OnDestroy {
   @ViewChild('chartCanvas', { static: false }) canvasRef?: ElementRef<HTMLCanvasElement>;
 
-  private chartAdapterService = inject(ChartAdapterService);
   private chartInstance: Chart | null = null;
+  private viewReady = false;
+
+  constructor() {
+    super();
+    // Re-render chart when A2UI properties change (e.g., drill-down updates data)
+    effect(() => {
+      // Read reactive signals to establish dependency tracking
+      const props = this.component().properties;
+      // Only re-render if the view is ready (canvas exists)
+      if (this.viewReady && props) {
+        this.renderChart();
+      }
+    });
+  }
 
   // Helper getters to access properties from component signal
   get graphType(): ChartType | undefined {
@@ -87,8 +99,8 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
   }
 
   ngAfterViewInit(): void {
-    // Render chart after view initialization
     console.log('GraphComponent ngAfterViewInit - interactive:', this.interactive, 'graphType:', this.graphType);
+    this.viewReady = true;
     this.renderChart();
   }
 
@@ -672,7 +684,7 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
   /**
    * Get colorblind-safe colors from Tailwind palette
    */
-  private getColors(index: number, total: number, alpha: number): string {
+  private getColors(index: number, _total: number, alpha: number): string {
     const palettes = {
       default: ['#3b82f6', '#06b6d4', '#f97316', '#8b5cf6', '#ec4899', '#f59e0b'],
       sequential: ['#dbeafe', '#93c5fd', '#3b82f6', '#1e40af', '#1e3a8a'],
@@ -695,7 +707,7 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
   /**
    * Handle chart click for drill-downs
    */
-  private handleChartClick(event: any, elements: any[]): void {
+  private handleChartClick(_event: any, elements: any[]): void {
     console.log('Chart clicked!', { interactive: this.interactive, elementsLength: elements.length });
 
     if (!this.interactive || elements.length === 0) {

@@ -41,6 +41,8 @@ interface TableColumn {
             <tr>
               @for (column of columns; track column.key) {
                 <th
+                  scope="col"
+                  [attr.aria-sort]="sortColumn() === column.key ? (sortDirection() === 'asc' ? 'ascending' : 'descending') : null"
                   [class]="isModern
                     ? 'px-6 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer hover:text-indigo-600 transition-colors'
                     : 'px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors'"

@@ -1,6 +1,6 @@
-import { Injectable, signal, inject, computed, Injector } from '@angular/core';
+import { Injectable, signal, inject, computed, Injector, OnDestroy } from '@angular/core';
 import { MessageProcessor } from '@a2ui/angular';
-import { A2UISurface } from '../models/a2ui.models';
+import { Subscription } from 'rxjs';
 import { ChatStateService } from './chat-state.service';
 import { AgUiService } from './ag-ui.service';
 import { SharedStateService } from './shared-state.service';
@@ -15,71 +15,79 @@ import { FEATURE_FLAGS } from '../config/feature-flags';
 @Injectable({
   providedIn: 'root',
 })
-export class A2UIEventService {
+export class A2UIEventService implements OnDestroy {
   private messageProcessor = inject(MessageProcessor);
   private injector = inject(Injector);
+  private eventsSubscription: Subscription;
 
   constructor() {
     // Subscribe to A2UI events from the MessageProcessor
-    this.messageProcessor.events.subscribe((event) => {
+    this.eventsSubscription = this.messageProcessor.events.subscribe((event) => {
       console.log('MessageProcessor event:', event);
 
-      // Check if this is a user action (e.g., chart click)
-      if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) {
-        return;
-      }
-      if (event.message && event.message.userAction) {
-        const userAction = event.message.userAction;
-        console.log('User action detected:', userAction);
-        console.log('Context type:', typeof userAction.context, 'isArray:', Array.isArray(userAction.context));
-        console.log('Context value:', JSON.stringify(userAction.context, null, 2));
-
-        // Build action object from the userAction
-        // The context can be either:
-        // 1. An array of {key, value} pairs (A2UI spec format)
-        // 2. A flat object (A2UI library auto-transforms arrays to objects)
-        const contextProps: any = {};
-
-        if (Array.isArray(userAction.context)) {
-          console.log('Parsing context array with', userAction.context.length, 'items');
-          for (const item of userAction.context) {
-            console.log('Context item:', item);
-            if (item.key && item.value) {
-              // Extract the actual value from the literal wrapper
-              const actualValue = item.value.literalString
-                ?? item.value.literalNumber
-                ?? item.value.literalBoolean
-                ?? item.value.path;
-              console.log(`Extracted ${item.key} =`, actualValue);
-              contextProps[item.key] = actualValue;
-            }
-          }
-        } else if (typeof userAction.context === 'object' && userAction.context !== null) {
-          // Context is already a flat object - A2UI library auto-transformed it
-          console.log('Context is already a flat object, using directly');
-          Object.assign(contextProps, userAction.context);
+      // Always complete the event to prevent MessageProcessor from hanging
+      try {
+        // Check if this is a user action (e.g., chart click)
+        if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) {
+          return;
         }
-        console.log('Final contextProps:', contextProps);
+        if (event.message && event.message.userAction) {
+          const userAction = event.message.userAction;
+          console.log('User action detected:', userAction);
+          console.log('Context type:', typeof userAction.context, 'isArray:', Array.isArray(userAction.context));
+          console.log('Context value:', JSON.stringify(userAction.context, null, 2));
 
-        const action = {
-          type: userAction.name,
-          actionType: userAction.name,
-          surfaceId: userAction.surfaceId,
-          sourceComponentId: userAction.sourceComponentId,
-          timestamp: userAction.timestamp,
-          ...contextProps, // Spread the parsed context properties (label, value, datasetLabel)
-        };
+          // Build action object from the userAction
+          // The context can be either:
+          // 1. An array of {key, value} pairs (A2UI spec format)
+          // 2. A flat object (A2UI library auto-transforms arrays to objects)
+          const contextProps: any = {};
 
-        console.log('Action to handle:', action);
+          if (Array.isArray(userAction.context)) {
+            console.log('Parsing context array with', userAction.context.length, 'items');
+            for (const item of userAction.context) {
+              console.log('Context item:', item);
+              if (item.key && item.value) {
+                // Extract the actual value from the literal wrapper
+                const actualValue = item.value.literalString
+                  ?? item.value.literalNumber
+                  ?? item.value.literalBoolean
+                  ?? item.value.path;
+                console.log(`Extracted ${item.key} =`, actualValue);
+                contextProps[item.key] = actualValue;
+              }
+            }
+          } else if (typeof userAction.context === 'object' && userAction.context !== null) {
+            // Context is already a flat object - A2UI library auto-transformed it
+            console.log('Context is already a flat object, using directly');
+            Object.assign(contextProps, userAction.context);
+          }
+          console.log('Final contextProps:', contextProps);
 
-        // Handle the action
-        this.handleA2UIAction(action);
+          const action = {
+            type: userAction.name,
+            actionType: userAction.name,
+            surfaceId: userAction.surfaceId,
+            sourceComponentId: userAction.sourceComponentId,
+            timestamp: userAction.timestamp,
+            ...contextProps, // Spread the parsed context properties (label, value, datasetLabel)
+          };
 
-        // Complete the event (required by MessageProcessor)
+          console.log('Action to handle:', action);
+
+          // Handle the action
+          this.handleA2UIAction(action);
+        }
+      } finally {
+        // Complete the event on every path (required by MessageProcessor)
         event.completion.next([]);
         event.completion.complete();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.eventsSubscription.unsubscribe();
   }
 
   // Core signals - currentSurfaceId tracks which surface to display
@@ -96,16 +104,6 @@ export class A2UIEventService {
   });
 
   readonly thumbnailSurface = computed(() => this.currentSurface());
-
-  // Known A2UI component types (registered in catalog)
-  private readonly knownTypes = new Set([
-    'Graph',
-    'KPICard',
-    'DataTable',
-    'RAGIndicator',
-    'InsightCard',
-    'CompositeDashboard',
-  ]);
 
   /**
    * Handle A2UI messages from the backend.
@@ -251,16 +249,6 @@ export class A2UIEventService {
   }
 
   /**
-   * Legacy method - kept for backward compatibility
-   * Converts old payload format to message format
-   */
-  handleA2UISurface(payload: A2UISurface): void {
-    console.warn('handleA2UISurface called with legacy payload format. Use handleA2UIMessages instead.');
-    // This would need conversion logic if still used
-  }
-
-
-  /**
    * Clear all surfaces
    */
   clearSurface(): void {
@@ -334,7 +322,9 @@ export class A2UIEventService {
     try {
       await agUiService.runAgent();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to process drill-down';
       console.error('Failed to run agent after drill-down:', error);
+      chatState.setError(errorMsg);
     }
   }
 }

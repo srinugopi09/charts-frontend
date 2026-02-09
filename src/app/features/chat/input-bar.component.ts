@@ -27,7 +27,7 @@ import { AgUiService } from '../../core/services/ag-ui.service';
             [(ngModel)]="inputText"
             (keydown)="onKeyDown($event)"
             (input)="autoResize()"
-            [disabled]="false"
+            aria-label="Ask about your data"
             placeholder="Ask about your data..."
             class="flex-1 resize-none border-0 bg-white px-3 py-2.5 max-h-24 focus:outline-none disabled:bg-gray-50 text-black placeholder-gray-400 font-semibold"
             rows="1"></textarea>
@@ -35,6 +35,7 @@ import { AgUiService } from '../../core/services/ag-ui.service';
           @if (isStreaming()) {
             <button
               (click)="onCancel()"
+              aria-label="Cancel agent response"
               class="flex-shrink-0 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-200 font-medium shadow-sm hover:shadow-md flex items-center gap-2 group">
               <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -55,7 +56,7 @@ import { AgUiService } from '../../core/services/ag-ui.service';
         </div>
 
         @if (chatState.error()) {
-          <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2 animate-slideIn">
+          <div role="alert" class="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 flex items-start gap-2 animate-slideIn">
             <svg class="w-5 h-5 flex-shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
