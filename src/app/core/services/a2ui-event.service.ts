@@ -103,8 +103,6 @@ export class A2UIEventService implements OnDestroy {
     return surfaces.get(surfaceId) || null;
   });
 
-  readonly thumbnailSurface = computed(() => this.currentSurface());
-
   /**
    * Handle A2UI messages from the backend.
    *

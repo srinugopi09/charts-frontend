@@ -268,7 +268,13 @@ export class DataTableComponent extends CatalogBaseComponent {
     }
   }
 
+  get interactive(): boolean {
+    if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) return false;
+    return this.getProp<boolean>('interactive', true)!;
+  }
+
   protected handleRowClick(row: Record<string, any>): void {
+    if (!this.interactive) return;
     this.sendAction({
       name: 'drill_down',
       context: [

@@ -267,10 +267,16 @@ export class KPICardComponent extends CatalogBaseComponent {
     return this.status ? statusMap[this.status] : 'Normal';
   }
 
+  get interactive(): boolean {
+    if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) return false;
+    return this.getProp<boolean>('interactive', true)!;
+  }
+
   /**
    * Handle card click - emit drill-down action using correct A2UI format
    */
   protected handleClick(): void {
+    if (!this.interactive) return;
     this.sendAction({
       name: 'drill_down',
       context: [

@@ -97,10 +97,9 @@ export class CanvasPanelComponent {
     const surface = this.currentSurface();
     if (!surface || !surface.componentTree) return '';
 
-    // Extract title from component tree root
-    // The componentTree is the root AnyComponentNode
-    // For custom components, we'd need to inspect the component type
-    return 'Visualization'; // Simplified for now - could extract from componentTree props
+    const tree: any = surface.componentTree;
+    // Try component properties first, fall back to component type name
+    return tree.properties?.title || tree.type || 'Visualization';
   });
 
   /**

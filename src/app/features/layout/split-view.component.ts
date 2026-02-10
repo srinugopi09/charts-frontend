@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -117,7 +117,6 @@ export class SplitViewComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Signals for layout state
   readonly chatWidth = signal<number>(40); // percentage
-  readonly canvasWidth = computed(() => 100 - this.chatWidth());
   readonly activeTab = signal<'chat' | 'canvas'>('chat');
   readonly isDragging = signal(false);
 
@@ -205,7 +204,7 @@ export class SplitViewComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Save split ratio to localStorage
    */
-  saveSplitRatio(): void {
+  private saveSplitRatio(): void {
     try {
       localStorage.setItem(this.STORAGE_KEY, this.chatWidth().toString());
     } catch (e) {

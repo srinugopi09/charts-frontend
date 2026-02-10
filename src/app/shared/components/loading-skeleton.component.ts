@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -12,8 +12,8 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div [style.height]="height" class="w-full" role="status" aria-label="Loading content">
-      @if (type === 'chart') {
+    <div [style.height]="height()" class="w-full" role="status" aria-label="Loading content">
+      @if (type() === 'chart') {
         <!-- Chart skeleton with modern shimmer effect -->
         <div class="space-y-4 animate-fadeIn">
           <!-- Title bar with gradient shimmer -->
@@ -41,7 +41,7 @@ import { CommonModule } from '@angular/common';
         </div>
       }
 
-      @if (type === 'table') {
+      @if (type() === 'table') {
         <!-- Table skeleton with modern styling -->
         <div class="space-y-3 animate-fadeIn">
           <!-- Header with gradient -->
@@ -62,7 +62,7 @@ import { CommonModule } from '@angular/common';
         </div>
       }
 
-      @if (type === 'card') {
+      @if (type() === 'card') {
         <!-- Card skeleton with modern card styling -->
         <div class="p-6 space-y-4 bg-white rounded-2xl border border-gray-100 shadow-sm animate-fadeIn">
           <!-- Title with gradient shimmer -->
@@ -81,6 +81,6 @@ import { CommonModule } from '@angular/common';
   `,
 })
 export class LoadingSkeletonComponent {
-  @Input() type: 'chart' | 'table' | 'card' = 'chart';
-  @Input() height = '400px';
+  readonly type = input<'chart' | 'table' | 'card'>('chart');
+  readonly height = input('400px');
 }

@@ -40,6 +40,8 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
   `,
 })
 export class GraphComponent extends CatalogBaseComponent implements AfterViewInit, OnDestroy {
+  private static readonly MODERN_PALETTE = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#7c3aed'];
+
   @ViewChild('chartCanvas', { static: false }) canvasRef?: ElementRef<HTMLCanvasElement>;
 
   private chartInstance: Chart | null = null;
@@ -217,7 +219,7 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
     const isSingleDataset = this.data!.datasets.length === 1;
     const isStacked = this.graphType === 'stackedBar';
     const isHorizontal = this.isHorizontalBar;
-    const modernPalette = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#7c3aed'];
+    const modernPalette = GraphComponent.MODERN_PALETTE;
 
     const formatValue = this.formatCompactValue.bind(this);
 
@@ -391,7 +393,7 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
    * Modern line/area configuration — refined styling behind MODERN_CHART_STYLE flag
    */
   private buildModernLineConfig(chartType: ChartJsType, ctx: CanvasRenderingContext2D): ChartConfiguration {
-    const modernPalette = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#7c3aed'];
+    const modernPalette = GraphComponent.MODERN_PALETTE;
     const isArea = this.graphType === 'area';
 
     return {
@@ -502,7 +504,7 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
    */
   private buildModernPieConfig(chartType: ChartJsType): ChartConfiguration {
     const labels = this.data!.labels || [];
-    const modernPalette = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#7c3aed'];
+    const modernPalette = GraphComponent.MODERN_PALETTE;
     const formatValue = this.formatCompactValue.bind(this);
 
     // Compute total for percentage calculation

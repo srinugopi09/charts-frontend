@@ -1,4 +1,4 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
  * Features:
  * - Display current visualization title
  * - History dropdown (future enhancement)
- * - Fullscreen toggle (future enhancement)
  */
 @Component({
   selector: 'app-canvas-toolbar',
@@ -55,29 +54,6 @@ import { CommonModule } from '@angular/common';
           </svg>
         </button>
 
-        <!-- Fullscreen Toggle with animation -->
-        <button
-          (click)="toggleFullscreen()"
-          class="p-2.5 text-gray-500 hover:bg-white hover:text-blue-600 rounded-xl transition-all duration-200 hover:shadow-md group"
-          [title]="isFullscreen() ? 'Exit fullscreen' : 'Enter fullscreen'">
-          @if (isFullscreen()) {
-            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
-            </svg>
-          } @else {
-            <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
-            </svg>
-          }
-        </button>
       </div>
     </div>
   `,
@@ -85,13 +61,4 @@ import { CommonModule } from '@angular/common';
 export class CanvasToolbarComponent {
   readonly title = input<string>('');
 
-  protected readonly isFullscreen = signal<boolean>(false);
-
-  /**
-   * Toggle fullscreen mode
-   */
-  protected toggleFullscreen(): void {
-    this.isFullscreen.update((val) => !val);
-    // TODO: Implement actual fullscreen logic in parent component
-  }
 }
