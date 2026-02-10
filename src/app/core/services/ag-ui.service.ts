@@ -81,9 +81,9 @@ export class AgUiService {
           },
           onRunFailed: ({ error }) => {
             this.clearStreamTimeout();
-            // Suppress noisy AGUIError when library sends RUN_FINISHED after RUN_ERROR
+            // Suppress noisy AGUIError and user-initiated aborts
             const msg = error?.message || '';
-            if (msg.includes('The run has already errored')) {
+            if (msg.includes('The run has already errored') || msg.includes('aborted')) {
               return;
             }
             console.error('Agent error:', error);
@@ -125,6 +125,7 @@ export class AgUiService {
    * Cancel the current agent stream
    */
   cancel(): void {
+    this.clearStreamTimeout();
     this.agent.abortRun();
     this.chatState.finalizeStreamingMessage();
     this.chatState.isStreaming.set(false);
@@ -266,6 +267,11 @@ export class AgUiService {
         break;
 
       case 'RUN_ERROR':
+        // Suppress user-initiated abort — not an actual error
+        if (('code' in event && event['code'] === 'abort') ||
+            ('message' in event && String(event['message']).includes('aborted'))) {
+          break;
+        }
         // Finalize any in-progress streaming message before setting error
         if (this.chatState.currentStreamingMessage()) {
           this.chatState.finalizeStreamingMessage();
