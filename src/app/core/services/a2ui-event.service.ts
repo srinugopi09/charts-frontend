@@ -262,6 +262,8 @@ export class A2UIEventService implements OnDestroy {
    * Generates natural language follow-up messages and triggers agent
    */
   async handleA2UIAction(action: any): Promise<void> {
+    if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) return;
+
     let message = '';
     let filterContext: any = {};
 
