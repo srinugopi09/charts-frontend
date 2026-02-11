@@ -23,17 +23,36 @@ import { CatalogBaseComponent } from '../catalog-base.component';
         <h2 class="text-2xl font-bold text-gray-900 mb-6">{{ title }}</h2>
       }
 
-      <!-- Grid Container -->
-      <div [class]="gridClass">
-        @for (child of children; track child.id) {
-          <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
-        }
-      </div>
+      <!-- KPI row: compact horizontal strip -->
+      @if (kpiChildren.length) {
+        <div class="flex flex-wrap gap-4 mb-6">
+          @for (child of kpiChildren; track child.id) {
+            <div class="flex-1 min-w-[180px]">
+              <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Content grid: charts, tables, insights get more space -->
+      @if (contentChildren.length) {
+        <div [class]="contentGridClass">
+          @for (child of contentChildren; track child.id) {
+            <div>
+              @if (child.properties?.title) {
+                <h3 class="text-base font-semibold text-gray-800 mb-2">{{ child.properties.title }}</h3>
+              }
+              <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
+            </div>
+          }
+        </div>
+      }
     </div>
   `,
 })
 export class CompositeDashboardComponent extends CatalogBaseComponent {
-  // Property getters via getProp pattern
+  private static readonly KPI_TYPES = new Set(['KPICard', 'RAGIndicator']);
+
   get title(): string | undefined {
     return this.getProp<string>('title');
   }
@@ -42,25 +61,22 @@ export class CompositeDashboardComponent extends CatalogBaseComponent {
     return this.getProp<any>('layout', 'auto')!;
   }
 
-  // After tree resolution, children are fully resolved AnyComponentNode[]
-  get children(): any[] {
+  private get children(): any[] {
     const raw = this.getProp<any>('children');
     return Array.isArray(raw) ? raw : [];
   }
 
-  protected get gridClass(): string {
-    const baseClasses = 'grid gap-4';
+  get kpiChildren(): any[] {
+    return this.children.filter((c: any) => CompositeDashboardComponent.KPI_TYPES.has(c.type));
+  }
 
-    switch (this.layout) {
-      case '2-column':
-        return `${baseClasses} grid-cols-1 md:grid-cols-2`;
-      case '3-column':
-        return `${baseClasses} grid-cols-1 md:grid-cols-2 lg:grid-cols-3`;
-      case '1-top-2-bottom':
-        return `${baseClasses} grid-cols-1 md:grid-cols-2 [&>*:first-child]:md:col-span-2`;
-      case 'auto':
-      default:
-        return `${baseClasses} grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`;
-    }
+  get contentChildren(): any[] {
+    return this.children.filter((c: any) => !CompositeDashboardComponent.KPI_TYPES.has(c.type));
+  }
+
+  protected get contentGridClass(): string {
+    const count = this.contentChildren.length;
+    if (count === 1) return 'grid grid-cols-1 gap-6';
+    return 'grid grid-cols-1 md:grid-cols-2 gap-6';
   }
 }

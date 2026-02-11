@@ -56,17 +56,19 @@ import { CommonModule } from '@angular/common';
         role="tabpanel"
         [attr.data-panel]="'chat'"
         [attr.data-active]="activeTab() === 'chat'"
-        [style.width.%]="chatWidth()"
+        [style.width.%]="isCanvasFullscreen() ? 0 : chatWidth()"
+        [hidden]="isCanvasFullscreen()"
         class="h-full overflow-hidden flex flex-col panel-wrapper">
         <ng-content select="[slot='chat']"></ng-content>
       </div>
 
-      <!-- Draggable divider (desktop only) -->
+      <!-- Draggable divider (desktop only, hidden in fullscreen) -->
       <div
         role="separator"
         aria-orientation="vertical"
         aria-label="Resize panels"
         (pointerdown)="onDividerPointerDown($event)"
+        [hidden]="isCanvasFullscreen()"
         class="hidden lg:flex w-1.5 flex-shrink-0 bg-gray-200 cursor-col-resize hover:bg-blue-400 transition-colors relative z-10 items-center justify-center"
         [class.bg-blue-500]="isDragging()"
         style="touch-action: none;">
@@ -119,6 +121,7 @@ export class SplitViewComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly chatWidth = signal<number>(40); // percentage
   readonly activeTab = signal<'chat' | 'canvas'>('chat');
   readonly isDragging = signal(false);
+  readonly isCanvasFullscreen = signal(false);
 
   // Constraints
   private readonly MIN_CHAT_WIDTH_PCT = 20;
@@ -246,5 +249,9 @@ export class SplitViewComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   setMobileView(view: 'chat' | 'canvas'): void {
     this.activeTab.set(view);
+  }
+
+  toggleCanvasFullscreen(): void {
+    this.isCanvasFullscreen.update((v) => !v);
   }
 }
