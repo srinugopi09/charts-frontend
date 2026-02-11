@@ -1,59 +1,97 @@
-# ChartsFrontend
+# Agentic Analytics Chatbot - Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
+Conversational analytics app where users ask natural-language questions about data and receive text responses with interactive visualizations. Built with Angular 21, Chart.js, and Tailwind CSS.
 
-## Development server
+## Prerequisites
 
-To start a local development server, run:
+- **Node.js** >= 20 (LTS recommended)
+- **npm** >= 11
+- **Backend** running on `http://localhost:8080` ([charts-backend](https://github.com/srinugopi09/charts-backend) repo)
 
-```bash
-ng serve
-```
+## Getting Started
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 1. Clone the repo
 
 ```bash
-ng generate component component-name
+git clone https://github.com/srinugopi09/charts-frontend.git
+cd charts-frontend
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### 2. Install dependencies
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
+### 3. Start the backend
 
-To build the project run:
+The frontend expects the FastAPI backend running on port 8080. Follow the setup instructions in the [backend repo](https://github.com/srinugopi09/charts-backend).
+
+### 4. Start the dev server
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open [http://localhost:4201](http://localhost:4201) in your browser.
 
-## Running unit tests
+## Available Scripts
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm start`            | Dev server on port 4201 with live reload |
+| `npm run build`        | Production build to `dist/`              |
+| `npm test`             | Unit tests (Vitest)                      |
+| `npx playwright test`  | E2E tests (requires backend running)     |
+
+## Project Structure
+
+```text
+src/
+  app/
+    core/
+      config/          # Feature flags
+      services/        # AgUiService, ChatStateService, SharedStateService,
+                       # A2UIEventService, ChartAdapterService
+    features/
+      chat/            # Chat panel, message components
+      canvas/          # Canvas panel, toolbar
+      layout/          # Split-view (responsive)
+    a2ui-catalog/      # A2UI components: Graph, KPICard, DataTable,
+                       # RAGIndicator, InsightCard, CompositeDashboard
+  environments/        # API URLs per environment
+```
+
+## Architecture
+
+- **Agent Protocol:** AG-UI (SSE streaming via `@ag-ui/client`)
+- **UI Rendering:** A2UI dynamic component catalog (`@a2ui/angular`)
+- **Charts:** Chart.js 4.x rendered on canvas
+- **State:** Angular signals (no NgRx)
+- **Layout:** Responsive split-view with chat + visualization canvas
+  - Desktop: side-by-side with draggable divider + fullscreen toggle
+  - Tablet: tab switching
+  - Mobile: single panel with toggle
+
+## E2E Tests
+
+Tests use Playwright against a real backend (no mocks). The backend + Gemini must be running.
 
 ```bash
-ng test
+# Install Playwright browsers (first time only)
+npx playwright install
+
+# Run tests
+npx playwright test
+
+# Run with UI
+npx playwright test --ui
 ```
 
-## Running end-to-end tests
+## Configuration
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Setting         | File                                   | Default                  |
+| --------------- | -------------------------------------- | ------------------------ |
+| API URL         | `src/environments/environment.ts`      | `http://localhost:8080`  |
+| Dev server port | `package.json` (`start` script)        | `4201`                   |
+| Feature flags   | `src/app/core/config/feature-flags.ts` | See file                 |
