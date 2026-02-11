@@ -44,7 +44,8 @@ export class CompositeDashboardComponent extends CatalogBaseComponent {
 
   // After tree resolution, children are fully resolved AnyComponentNode[]
   get children(): any[] {
-    return this.getProp<any[]>('children', [])!;
+    const raw = this.getProp<any>('children');
+    return Array.isArray(raw) ? raw : [];
   }
 
   protected get gridClass(): string {

@@ -29,6 +29,10 @@ yarn-error.log
 !.vscode/mcp.json
 .history/*
 
+# Temporary files
+/temp
+/docs/techdebt.md
+
 # Miscellaneous
 /.angular/cache
 .sass-cache/

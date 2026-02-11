@@ -30,9 +30,6 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
   standalone: true,
   template: `
     <div class="w-full flex flex-col p-4" [style.min-height]="isModernStyled ? '600px' : '300px'">
-      @if (title) {
-        <h3 [class]="titleClass">{{ title }}</h3>
-      }
       <div class="relative w-full flex-1 min-h-0">
         <canvas #chartCanvas role="img" [attr.aria-label]="'Chart: ' + (title || graphType || 'visualization')"></canvas>
       </div>
@@ -92,12 +89,6 @@ export class GraphComponent extends CatalogBaseComponent implements AfterViewIni
   get interactive(): boolean {
     if (!FEATURE_FLAGS.DRILL_DOWN_ENABLED) return false;
     return this.getProp<boolean>('interactive', true)!;
-  }
-
-  get titleClass(): string {
-    return FEATURE_FLAGS.MODERN_CHART_STYLE
-      ? 'text-lg font-bold text-gray-900 mb-3 tracking-tight'
-      : 'text-lg font-semibold text-gray-800 mb-4';
   }
 
   get showLegend(): boolean {

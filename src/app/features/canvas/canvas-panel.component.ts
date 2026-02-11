@@ -59,8 +59,8 @@ import { LoadingSkeletonComponent } from '../../shared/components/loading-skelet
               </div>
             </div>
           } @else if (currentSurface()) {
-            <!-- A2UI Surface Renderer with modern container -->
-            <div class="max-w-6xl mx-auto animate-fadeIn">
+            <!-- A2UI Surface Renderer -->
+            <div class="w-full animate-fadeIn">
               <!-- Note: Actions are handled via MessageProcessor.events, not (action) output -->
               <a2ui-surface
                 [surfaceId]="'main'"

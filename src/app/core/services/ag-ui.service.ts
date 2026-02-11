@@ -24,7 +24,7 @@ export class AgUiService {
 
   private agent: HttpAgent;
   private streamTimeout: ReturnType<typeof setTimeout> | null = null;
-  private readonly STREAM_TIMEOUT_MS = 60_000; // 60 seconds
+  private readonly STREAM_TIMEOUT_MS = 180_000; // 3 minutes
 
   constructor() {
     // Initialize the HttpAgent with backend endpoint and thread ID
