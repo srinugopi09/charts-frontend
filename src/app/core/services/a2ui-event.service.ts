@@ -77,6 +77,9 @@ export class A2UIEventService implements OnDestroy {
   readonly currentSurfaceId = signal<string | null>(null);
   readonly catalogValidationError = signal<string | null>(null);
 
+  // Ordered list of surfaceIds as they arrive (for rendering all visualizations)
+  readonly surfaceHistory = signal<string[]>([]);
+
   // Computed signal that gets the actual surface from the processor
   readonly currentSurface = computed(() => {
     const surfaceId = this.currentSurfaceId();
@@ -84,6 +87,21 @@ export class A2UIEventService implements OnDestroy {
 
     const surfaces = this.messageProcessor.getSurfaces();
     return surfaces.get(surfaceId) || null;
+  });
+
+  // All surfaces in order, for the canvas feed
+  readonly allSurfaces = computed(() => {
+    const ids = this.surfaceHistory();
+    const surfaceMap = this.messageProcessor.getSurfaces();
+    return ids
+      .map((id) => {
+        const surface = surfaceMap.get(id);
+        if (!surface) return null;
+        const tree: any = surface.componentTree;
+        const title = tree?.properties?.title || tree?.type || 'Visualization';
+        return { id, surface, title };
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
   });
 
   /**
@@ -144,6 +162,7 @@ export class A2UIEventService implements OnDestroy {
 
       // 4. Update the current surface ID (triggers computed signal)
       this.currentSurfaceId.set(surfaceId);
+      this.surfaceHistory.update((ids) => [...ids, surfaceId]);
       this.catalogValidationError.set(null);
     } catch (error: any) {
       console.error('Failed to process A2UI messages:', error);
@@ -218,6 +237,7 @@ export class A2UIEventService implements OnDestroy {
   clearSurface(): void {
     this.messageProcessor.clearSurfaces();
     this.currentSurfaceId.set(null);
+    this.surfaceHistory.set([]);
     this.catalogValidationError.set(null);
   }
 
