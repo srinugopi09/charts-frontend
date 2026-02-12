@@ -1,4 +1,4 @@
-import { Component, Input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { A2UISurface } from '../../core/models/a2ui.models';
 
@@ -11,6 +11,7 @@ import { A2UISurface } from '../../core/models/a2ui.models';
 @Component({
   selector: 'app-chart-thumbnail',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div

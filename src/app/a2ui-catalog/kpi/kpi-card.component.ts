@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogBaseComponent } from '../catalog-base.component';
 import { FEATURE_FLAGS } from '../../core/config/feature-flags';
@@ -19,6 +19,7 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
 @Component({
   selector: 'app-kpi-card',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div

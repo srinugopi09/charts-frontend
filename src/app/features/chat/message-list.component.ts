@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../core/services/chat-state.service';
 import { AutoScrollDirective } from '../../shared/directives/auto-scroll.directive';
@@ -17,6 +17,7 @@ import { ChatMessage } from '../../core/models/chat.models';
 @Component({
   selector: 'app-message-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, AutoScrollDirective, MessageBubbleComponent],
   template: `
     <div class="h-full overflow-y-auto px-6 py-8 bg-gradient-to-b from-gray-50 to-white" appAutoScroll>

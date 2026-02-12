@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 /**
  * TypingIndicatorComponent
@@ -9,6 +9,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-typing-indicator',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex items-center gap-1.5 py-3">
       <div

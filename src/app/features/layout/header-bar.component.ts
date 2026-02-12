@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../core/services/chat-state.service';
 
@@ -11,6 +11,7 @@ import { ChatStateService } from '../../core/services/chat-state.service';
 @Component({
   selector: 'app-header-bar',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <header

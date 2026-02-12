@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Renderer } from '@a2ui/angular';
 import { CatalogBaseComponent } from '../catalog-base.component';
@@ -15,6 +15,7 @@ import { CatalogBaseComponent } from '../catalog-base.component';
 @Component({
   selector: 'app-composite-dashboard',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, Renderer],
   template: `
     <div class="w-full p-4">

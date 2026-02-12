@@ -1,4 +1,4 @@
-import { Component, signal, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-mobile-toggle',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div class="fixed bottom-20 right-4 md:hidden z-50">

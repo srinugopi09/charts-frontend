@@ -1,4 +1,4 @@
-import { Component, input, inject, Optional } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SplitViewComponent } from '../layout/split-view.component';
 
@@ -13,6 +13,7 @@ import { SplitViewComponent } from '../layout/split-view.component';
 @Component({
   selector: 'app-canvas-toolbar',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div class="h-16 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 px-6 flex items-center justify-between shadow-sm">

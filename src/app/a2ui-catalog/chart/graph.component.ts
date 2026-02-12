@@ -1,5 +1,6 @@
 import {
   Component,
+  ChangeDetectionStrategy,
   ElementRef,
   ViewChild,
   AfterViewInit,
@@ -28,6 +29,7 @@ import { FEATURE_FLAGS } from '../../core/config/feature-flags';
 @Component({
   selector: 'app-graph',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="w-full flex flex-col p-4" [style.min-height]="isModernStyled ? '600px' : '300px'">
       <div class="relative w-full flex-1 min-h-0">

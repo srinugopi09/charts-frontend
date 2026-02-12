@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MessageListComponent } from './message-list.component';
 import { InputBarComponent } from './input-bar.component';
 
@@ -11,6 +11,7 @@ import { InputBarComponent } from './input-bar.component';
 @Component({
   selector: 'app-chat-panel',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MessageListComponent, InputBarComponent],
   template: `
     <div class="h-full flex flex-col bg-gray-50 overflow-hidden">

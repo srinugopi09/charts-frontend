@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogBaseComponent } from '../catalog-base.component';
 
@@ -17,6 +17,7 @@ import { CatalogBaseComponent } from '../catalog-base.component';
 @Component({
   selector: 'app-rag-indicator',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div

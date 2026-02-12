@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 
 /**
  * CanvasEmptyStateComponent
@@ -9,6 +9,7 @@ import { Component, input, output } from '@angular/core';
 @Component({
   selector: 'app-canvas-empty-state',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="h-full overflow-y-auto flex items-center justify-center p-8 bg-gradient-to-br from-blue-50 via-white to-purple-50 animate-fadeIn">
       <div class="max-w-3xl w-full text-center">

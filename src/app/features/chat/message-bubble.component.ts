@@ -1,4 +1,4 @@
-import { Component, Input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { ChatMessage } from '../../core/models/chat.models';
@@ -18,6 +18,7 @@ import { ChartThumbnailComponent } from './chart-thumbnail.component';
 @Component({
   selector: 'app-message-bubble',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     MarkdownModule,

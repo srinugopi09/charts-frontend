@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatStateService } from '../../core/services/chat-state.service';
@@ -17,6 +17,7 @@ import { AgUiService } from '../../core/services/ag-ui.service';
 @Component({
   selector: 'app-input-bar',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="border-t border-gray-200 bg-gradient-to-b from-white to-gray-50 px-6 py-4 shadow-lg">

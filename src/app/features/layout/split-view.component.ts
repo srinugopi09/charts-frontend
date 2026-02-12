@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, signal, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-split-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <!-- Tablet/Mobile tab bar (hidden on desktop) -->

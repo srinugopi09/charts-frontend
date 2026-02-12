@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Surface } from '@a2ui/angular';
 import { A2UIEventService } from '../../core/services/a2ui-event.service';
@@ -21,6 +21,7 @@ import { LoadingSkeletonComponent } from '../../shared/components/loading-skelet
 @Component({
   selector: 'app-canvas-panel',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     Surface,

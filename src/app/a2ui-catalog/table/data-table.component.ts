@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogBaseComponent } from '../catalog-base.component';
 import { FEATURE_FLAGS } from '../../core/config/feature-flags';
@@ -24,6 +24,7 @@ interface TableColumn {
 @Component({
   selector: 'app-data-table',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div [class]="isModern ? 'w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden' : 'w-full bg-white rounded-lg border border-gray-200'">
@@ -152,7 +153,7 @@ export class DataTableComponent extends CatalogBaseComponent {
     return this.getProp<TableColumn[]>('columns', [])!;
   }
 
-  get rows(): Record<string, any>[] {
+  private readonly _rows = computed(() => {
     const rawRows = this.getProp<any[]>('rows', [])!;
     if (!rawRows || rawRows.length === 0) return [];
 
@@ -170,6 +171,10 @@ export class DataTableComponent extends CatalogBaseComponent {
     }
 
     return rawRows as Record<string, any>[];
+  });
+
+  get rows(): Record<string, any>[] {
+    return this._rows();
   }
 
   get sortable(): boolean {

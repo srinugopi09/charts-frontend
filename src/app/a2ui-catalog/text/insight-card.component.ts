@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogBaseComponent } from '../catalog-base.component';
 import { MarkdownModule } from 'ngx-markdown';
@@ -17,6 +17,7 @@ import { MarkdownModule } from 'ngx-markdown';
 @Component({
   selector: 'app-insight-card',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, MarkdownModule],
   template: `
     <div [class]="cardClass" class="p-4 bg-white border-l-4 rounded-lg shadow-sm">
