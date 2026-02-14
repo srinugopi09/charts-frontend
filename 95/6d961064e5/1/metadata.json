@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "956d961064e5",
+  "session_id": "1dd4a4ec-86e6-49fc-9a80-3954a8704df8",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-14T03:12:17.453267Z",
+  "branch": "cleanup/let-agui-generate-ids",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/app/core/services/ag-ui.service.ts",
+    "src/app/core/services/chat-state.service.ts"
+  ],
+  "agent": "Claude Code",
+  "transcript_identifier_at_start": "2de1b0d4-e2e9-436d-b2a2-b9e73a4c979c",
+  "token_usage": {
+    "input_tokens": 176,
+    "cache_creation_tokens": 247129,
+    "cache_read_tokens": 1743594,
+    "output_tokens": 482,
+    "api_call_count": 42
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-14T03:12:17.398507Z",
+    "agent_lines": 5,
+    "human_added": 1,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 6,
+    "agent_percentage": 83.33333333333334
+  }
+}
