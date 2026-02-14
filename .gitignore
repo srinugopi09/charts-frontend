@@ -52,6 +52,7 @@ __screenshots__/
 # AI tool configs
 .agents/
 .claude/
+.entire/
 .goose/
 .kiro/
 .cursor/

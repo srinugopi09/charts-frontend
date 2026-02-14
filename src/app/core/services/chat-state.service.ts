@@ -16,7 +16,6 @@ export class ChatStateService {
   readonly messages = signal<ChatMessage[]>([]);
   readonly isStreaming = signal<boolean>(false);
   readonly currentStreamingMessage = signal<ChatMessage | null>(null);
-  readonly sessionId = signal<string>(this.generateSessionId());
   readonly error = signal<string | null>(null);
 
   // Computed signals
@@ -234,13 +233,6 @@ export class ChatStateService {
     this.currentStreamingMessage.set(null);
     this.isStreaming.set(false);
     this.clearError();
-  }
-
-  /**
-   * Generate a unique session ID
-   */
-  private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
