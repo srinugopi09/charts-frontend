@@ -1,0 +1,5 @@
+update the .gitignore with relevent changes
+
+---
+
+I think changes have been lost, can you try again

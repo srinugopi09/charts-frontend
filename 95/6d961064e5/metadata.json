@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "956d961064e5",
+  "strategy": "manual-commit",
+  "branch": "cleanup/let-agui-generate-ids",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".gitignore"
+  ],
+  "sessions": [
+    {
+      "metadata": "/95/6d961064e5/0/metadata.json",
+      "transcript": "/95/6d961064e5/0/full.jsonl",
+      "context": "/95/6d961064e5/0/context.md",
+      "content_hash": "/95/6d961064e5/0/content_hash.txt",
+      "prompt": "/95/6d961064e5/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 10,
+    "cache_creation_tokens": 16488,
+    "cache_read_tokens": 167687,
+    "output_tokens": 23,
+    "api_call_count": 6
+  }
+}
