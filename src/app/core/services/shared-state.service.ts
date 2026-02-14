@@ -35,24 +35,13 @@ export class SharedStateService {
   }
 
   /**
-   * Apply a JSON Patch to the agent context (for STATE_DELTA events)
-   * Simplified implementation - handles basic replace operations
+   * Sync the Angular signal from the library's auto-patched agent state.
+   * The @ag-ui/client library applies full RFC 6902 JSON Patch operations
+   * via fast-json-patch internally — we just adopt the result.
    */
-  applyJsonPatch(patch: any): void {
-    if (!patch || !Array.isArray(patch)) return;
-
-    this.agentContext.update((current) => {
-      let updated = { ...current };
-
-      for (const operation of patch) {
-        if (operation.op === 'replace' && operation.path && operation.value !== undefined) {
-          const path = operation.path.split('/').filter((p: string) => p);
-          this.applyReplace(updated, path, operation.value);
-        }
-      }
-
-      return updated;
-    });
+  syncFromAgent(state: any): void {
+    if (!state || typeof state !== 'object') return;
+    this.agentContext.set(state as AgentContext);
   }
 
   /**
@@ -98,21 +87,4 @@ export class SharedStateService {
     });
   }
 
-  /**
-   * Helper to apply a replace operation to a nested path
-   */
-  private applyReplace(obj: any, path: string[], value: any): void {
-    if (path.length === 0) return;
-
-    if (path.length === 1) {
-      obj[path[0]] = value;
-      return;
-    }
-
-    const [head, ...tail] = path;
-    if (!obj[head]) {
-      obj[head] = {};
-    }
-    this.applyReplace(obj[head], tail, value);
-  }
 }

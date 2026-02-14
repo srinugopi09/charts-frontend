@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpAgent } from '@ag-ui/client';
-import { BaseEvent } from '@ag-ui/core';
+import { HttpAgent, AgentSubscriber } from '@ag-ui/client';
 import { ChatStateService } from './chat-state.service';
 import { SharedStateService } from './shared-state.service';
 import { A2UIEventService } from './a2ui-event.service';
@@ -67,35 +66,14 @@ export class AgUiService {
         this.chatState.setError('Agent response timed out — please try again');
       }, this.STREAM_TIMEOUT_MS);
 
-      // Run agent with subscriber for events
+      // Run agent with typed subscriber callbacks
       await this.agent.runAgent(
         {
           tools: [],
           context: [],
           forwardedProps: {},
         },
-        {
-          onEvent: ({ event }) => {
-            this.handleEvent(event);
-          },
-          onRunFailed: ({ error }) => {
-            this.clearStreamTimeout();
-            // Suppress noisy AGUIError and user-initiated aborts
-            const msg = error?.message || '';
-            if (msg.includes('The run has already errored') || msg.includes('aborted')) {
-              return;
-            }
-            console.error('Agent error:', error);
-            this.chatState.setError(msg || 'Failed to connect to agent');
-            this.chatState.isStreaming.set(false);
-          },
-          onRunFinalized: () => {
-            this.clearStreamTimeout();
-            console.log('Agent stream complete');
-            this.chatState.finalizeStreamingMessage();
-            this.chatState.isStreaming.set(false);
-          },
-        }
+        this.buildSubscriber(),
       );
     } catch (error: any) {
       this.clearStreamTimeout();
@@ -131,161 +109,134 @@ export class AgUiService {
   }
 
   /**
-   * Handle individual AG-UI events from the agent
+   * Build a typed AgentSubscriber — replaces the manual switch(event.type).
+   * Each callback receives typed event data and accumulated buffers from the library.
    */
-  private handleEvent(event: BaseEvent): void {
-    console.log('AG-UI Event:', event.type, event);
+  private buildSubscriber(): AgentSubscriber {
+    return {
+      // ── Logging (fires for every event) ────────────────────────
+      onEvent: ({ event }) => {
+        console.log('AG-UI Event:', event.type, event);
+      },
 
-    switch (event.type) {
-      case 'RUN_STARTED':
+      // ── Lifecycle ─────────────────────────────────────────────
+      onRunStartedEvent: () => {
         this.chatState.isStreaming.set(true);
-        break;
+      },
 
-      case 'TEXT_MESSAGE_START':
-        this.chatState.startAssistantMessage();
-        break;
-
-      case 'TEXT_MESSAGE_CONTENT':
-        // Events use 'delta' property, not 'content'
-        if ('delta' in event && typeof event['delta'] === 'string') {
-          this.chatState.appendStreamingContent(event['delta']);
-        }
-        break;
-
-      case 'TEXT_MESSAGE_END':
-        // Check if the completed message is raw chart JSON (not meant for display).
-        // We must read the accumulated content from the messages array, NOT from
-        // currentStreamingMessage(), because appendStreamingContent() creates new
-        // objects in the messages array while currentStreamingMessage still holds
-        // the original object with content: ''.
-        const streamingMsg = this.chatState.currentStreamingMessage();
-        if (streamingMsg) {
-          const actualMessage = this.chatState
-            .messages()
-            .find((m) => m.id === streamingMsg.id);
-          if (
-            actualMessage &&
-            this.isChartJsonContent(actualMessage.content)
-          ) {
-            // Remove this message - it's chart config, not a user-facing response
-            this.chatState.removeMessage(streamingMsg.id);
-            this.chatState.currentStreamingMessage.set(null);
-            this.chatState.isStreaming.set(false);
-          } else {
-            this.chatState.finalizeStreamingMessage();
-          }
-        } else {
-          this.chatState.finalizeStreamingMessage();
-        }
-        break;
-
-      case 'TOOL_CALL_START':
-        // Events use 'toolCallName' property, not 'toolName'
-        if ('toolCallName' in event) {
-          this.chatState.addToolCall({
-            toolName: String(event['toolCallName']),
-            status: 'running',
-          });
-        }
-        break;
-
-      case 'TOOL_CALL_ARGS':
-        // Events use 'toolCallName' property, not 'toolName'
-        if ('toolCallName' in event && 'args' in event) {
-          this.chatState.addToolCall({
-            toolName: String(event['toolCallName']),
-            status: 'running',
-            arguments: event['args'] as Record<string, any>,
-          });
-        }
-        break;
-
-      case 'TOOL_CALL_END':
-        // Events use 'toolCallName' property, not 'toolName'
-        if ('toolCallName' in event) {
-          this.chatState.addToolCall({
-            toolName: String(event['toolCallName']),
-            status: 'complete',
-            executionTimeMs: 'executionTimeMs' in event ? Number(event['executionTimeMs']) : undefined,
-          });
-        }
-        break;
-
-      case 'TOOL_CALL_RESULT':
-        // Handle tool call results - check for A2UI payload in content
-        if ('content' in event && event['content']) {
-          const content = event['content'];
-
-          // Content is typically a JSON string, so parse it first
-          try {
-            const parsed = typeof content === 'string' ? JSON.parse(content) : content;
-
-            // Check if this is an A2UI visualization payload
-            // Backend returns: {a2ui: true, surfaceId: "...", messages: [{beginRendering: ...}, {surfaceUpdate: ...}, ...]}
-            if (parsed && parsed.a2ui === true && parsed.surfaceId && parsed.messages && Array.isArray(parsed.messages)) {
-              console.log('A2UI visualization detected:', parsed.surfaceId);
-              console.log('A2UI messages from backend:', parsed.messages);
-
-              // Pass the messages directly to the A2UIEventService
-              // The MessageProcessor will handle them properly
-              this.a2uiEventService.handleA2UIMessages(parsed.surfaceId, parsed.messages);
-            }
-          } catch (e) {
-            // Not JSON or not A2UI payload - ignore
-            console.debug('Non-JSON tool result:', content);
-          }
-        }
-        break;
-
-      case 'STATE_DELTA':
-        if ('delta' in event && event['delta']) {
-          this.sharedState.applyJsonPatch(event['delta'] as any);
-        }
-        break;
-
-      case 'STATE_SNAPSHOT':
-        // Handle full state snapshots
-        if ('state' in event && event['state']) {
-          // For now, just log it - we could update the full context if needed
-          console.log('State snapshot received:', event['state']);
-        }
-        break;
-
-      case 'CUSTOM':
-        if ('name' in event && event['name'] === 'a2ui_surface_update' && 'data' in event) {
-          const data = event['data'] as any;
-          // Check if this is the new message format
-          if (data && data.surfaceId && data.messages && Array.isArray(data.messages)) {
-            this.a2uiEventService.handleA2UIMessages(data.surfaceId, data.messages);
-          }
-        }
-        break;
-
-      case 'RUN_FINISHED':
+      onRunFinishedEvent: () => {
         this.chatState.isStreaming.set(false);
-        break;
+      },
 
-      case 'RUN_ERROR':
+      onRunErrorEvent: ({ event }) => {
         // Suppress user-initiated abort — not an actual error
-        if (('code' in event && event['code'] === 'abort') ||
-            ('message' in event && String(event['message']).includes('aborted'))) {
-          break;
+        if (('code' in event && (event as any).code === 'abort') ||
+            ('message' in event && String((event as any).message).includes('aborted'))) {
+          return;
         }
-        // Finalize any in-progress streaming message before setting error
         if (this.chatState.currentStreamingMessage()) {
           this.chatState.finalizeStreamingMessage();
         }
-        const errorMessage =
-          'error' in event && typeof event['error'] === 'string'
-            ? event['error']
-            : 'Agent error';
-        this.chatState.setError(errorMessage);
+        const errorMessage = (event as any).error ?? 'Agent error';
+        this.chatState.setError(typeof errorMessage === 'string' ? errorMessage : 'Agent error');
         this.chatState.isStreaming.set(false);
-        break;
+      },
 
-      default:
-        console.log('Unhandled event type:', event.type);
-    }
+      onRunFailed: ({ error }) => {
+        this.clearStreamTimeout();
+        const msg = error?.message || '';
+        if (msg.includes('The run has already errored') || msg.includes('aborted')) {
+          return;
+        }
+        console.error('Agent error:', error);
+        this.chatState.setError(msg || 'Failed to connect to agent');
+        this.chatState.isStreaming.set(false);
+      },
+
+      onRunFinalized: () => {
+        this.clearStreamTimeout();
+        this.chatState.finalizeStreamingMessage();
+        this.chatState.isStreaming.set(false);
+      },
+
+      // ── Text message streaming ────────────────────────────────
+      onTextMessageStartEvent: () => {
+        this.chatState.startAssistantMessage();
+      },
+
+      onTextMessageContentEvent: ({ event }) => {
+        this.chatState.appendStreamingContent(event.delta);
+      },
+
+      onTextMessageEndEvent: ({ textMessageBuffer }) => {
+        // Check if the completed message is raw chart JSON (not meant for display).
+        const streamingMsg = this.chatState.currentStreamingMessage();
+        if (streamingMsg && this.isChartJsonContent(textMessageBuffer)) {
+          this.chatState.removeMessage(streamingMsg.id);
+          this.chatState.currentStreamingMessage.set(null);
+          this.chatState.isStreaming.set(false);
+        } else {
+          this.chatState.finalizeStreamingMessage();
+        }
+      },
+
+      // ── Tool calls ────────────────────────────────────────────
+      onToolCallStartEvent: ({ event }) => {
+        this.chatState.addToolCall({
+          toolName: event.toolCallName,
+          status: 'running',
+        });
+      },
+
+      onToolCallArgsEvent: ({ toolCallName, partialToolCallArgs }) => {
+        this.chatState.addToolCall({
+          toolName: toolCallName,
+          status: 'running',
+          arguments: partialToolCallArgs,
+        });
+      },
+
+      onToolCallEndEvent: ({ toolCallName }) => {
+        this.chatState.addToolCall({
+          toolName: toolCallName,
+          status: 'complete',
+        });
+      },
+
+      onToolCallResultEvent: ({ event }) => {
+        // Check for A2UI visualization payload in content
+        const content = (event as any).content;
+        if (!content) return;
+
+        try {
+          const parsed = typeof content === 'string' ? JSON.parse(content) : content;
+          if (parsed?.a2ui === true && parsed.surfaceId && Array.isArray(parsed.messages)) {
+            this.a2uiEventService.handleA2UIMessages(parsed.surfaceId, parsed.messages);
+          }
+        } catch {
+          // Not JSON or not A2UI payload — ignore
+        }
+      },
+
+      // ── State sync (library auto-applies patches via fast-json-patch) ──
+      onStateDeltaEvent: ({ agent }) => {
+        this.sharedState.syncFromAgent(agent.state);
+      },
+
+      onStateSnapshotEvent: ({ agent }) => {
+        this.sharedState.syncFromAgent(agent.state);
+      },
+
+      // ── Custom events (A2UI surface updates) ──────────────────
+      onCustomEvent: ({ event }) => {
+        if (event.name === 'a2ui_surface_update') {
+          const data = (event as any).data;
+          if (data?.surfaceId && Array.isArray(data.messages)) {
+            this.a2uiEventService.handleA2UIMessages(data.surfaceId, data.messages);
+          }
+        }
+      },
+    };
   }
 
   /**

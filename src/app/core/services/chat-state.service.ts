@@ -1,4 +1,5 @@
 import { Injectable, computed, signal } from '@angular/core';
+import { randomUUID } from '@ag-ui/client';
 import { ChatMessage, ToolCallInfo } from '../models/chat.models';
 import { A2UISurface } from '../models/a2ui.models';
 
@@ -236,9 +237,9 @@ export class ChatStateService {
   }
 
   /**
-   * Generate a unique message ID
+   * Generate a unique message ID using the library's uuid v4
    */
   private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return randomUUID();
   }
 }
