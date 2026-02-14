@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.4.2",
+  "checkpoint_id": "da3218f1ea2d",
+  "strategy": "manual-commit",
+  "branch": "cleanup/use-agui-library-features",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/app/core/services/ag-ui.service.ts",
+    "src/app/core/services/chat-state.service.ts",
+    "src/app/core/services/shared-state.service.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/da/3218f1ea2d/0/metadata.json",
+      "transcript": "/da/3218f1ea2d/0/full.jsonl",
+      "context": "/da/3218f1ea2d/0/context.md",
+      "content_hash": "/da/3218f1ea2d/0/content_hash.txt",
+      "prompt": "/da/3218f1ea2d/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 81,
+    "cache_creation_tokens": 259252,
+    "cache_read_tokens": 4496058,
+    "output_tokens": 599,
+    "api_call_count": 48
+  }
+}
