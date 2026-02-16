@@ -1,4 +1,5 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { ThreadService } from './thread.service';
 import { ChatStateService } from './chat-state.service';
@@ -29,9 +30,18 @@ export class ConversationService {
   private agUiService = inject(AgUiService);
   private a2uiEventService = inject(A2UIEventService);
   private sharedState = inject(SharedStateService);
+  private destroyRef = inject(DestroyRef);
 
   /** Currently active thread ID (null = new unsaved conversation) */
   readonly activeThreadId = signal<string | null>(null);
+
+  constructor() {
+    // Centralized post-run hook: fires after every agent run completes,
+    // regardless of which call site triggered it (input bar, example click, drill-down).
+    this.agUiService.runCompleted$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.onRunCompleted());
+  }
 
   /** Thread list for the sidebar */
   readonly threads = signal<Thread[]>([]);
@@ -144,7 +154,7 @@ export class ConversationService {
    * - Auto-titles new threads from the first user message
    * - Refreshes the thread list so new threads appear in sidebar
    */
-  async onRunCompleted(): Promise<void> {
+  private async onRunCompleted(): Promise<void> {
     const currentThreadId = this.agUiService.threadId;
     const isNewThread = !this.activeThreadId() && !!currentThreadId;
 

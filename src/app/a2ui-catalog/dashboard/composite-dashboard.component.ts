@@ -76,8 +76,19 @@ export class CompositeDashboardComponent extends CatalogBaseComponent {
   }
 
   protected get contentGridClass(): string {
-    const count = this.contentChildren.length;
-    if (count === 1) return 'grid grid-cols-1 gap-6';
-    return 'grid grid-cols-1 md:grid-cols-2 gap-6';
+    switch (this.layout) {
+      case '2-column':
+        return 'grid grid-cols-1 md:grid-cols-2 gap-6';
+      case '3-column':
+        return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+      case '1-top-2-bottom':
+        return 'grid grid-cols-1 md:grid-cols-2 gap-6 [&>*:first-child]:md:col-span-2';
+      case 'auto':
+      default: {
+        const count = this.contentChildren.length;
+        if (count === 1) return 'grid grid-cols-1 gap-6';
+        return 'grid grid-cols-1 md:grid-cols-2 gap-6';
+      }
+    }
   }
 }
