@@ -104,6 +104,9 @@ export class ConversationService {
     } catch (error) {
       console.error('Failed to switch thread:', error);
       this.chatState.setError('Failed to load conversation history');
+      // Clear stale thread ID so we don't retry on next page load
+      this.activeThreadId.set(null);
+      this.clearPersistedThread();
     } finally {
       this.isLoadingHistory.set(false);
     }

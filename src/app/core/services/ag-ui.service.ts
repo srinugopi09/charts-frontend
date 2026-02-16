@@ -162,6 +162,7 @@ export class AgUiService {
       },
 
       onRunErrorEvent: ({ event }) => {
+        this.clearStreamTimeout();
         // Suppress user-initiated abort — not an actual error
         if (('code' in event && (event as any).code === 'abort') ||
             ('message' in event && String((event as any).message).includes('aborted'))) {
