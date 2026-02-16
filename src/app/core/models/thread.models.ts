@@ -90,21 +90,31 @@ export function mapBackendMessages(messages: BackendMessage[]): ChatMessage[] {
 /**
  * Extract A2UI visualization payloads from backend messages.
  * These are replayed through A2UIEventService to rebuild the canvas.
+ *
+ * The A2UI data lives in `msg.content` as a JSON string:
+ *   {"a2ui": true, "surfaceId": "chart-xxx", "messages": [...]}
+ * The `event_data` field only contains AG-UI protocol metadata.
  */
 export function extractA2UIPayloads(messages: BackendMessage[]): A2UIHistoryPayload[] {
   const payloads: A2UIHistoryPayload[] = [];
 
   for (const msg of messages) {
-    if (
-      msg.role === 'tool' &&
-      msg.event_data?.a2ui === true &&
-      msg.event_data.surfaceId &&
-      Array.isArray(msg.event_data.messages)
-    ) {
-      payloads.push({
-        surfaceId: msg.event_data.surfaceId,
-        messages: msg.event_data.messages,
-      });
+    if (msg.role !== 'tool' || !msg.content) continue;
+
+    try {
+      const parsed = JSON.parse(msg.content);
+      if (
+        parsed.a2ui === true &&
+        parsed.surfaceId &&
+        Array.isArray(parsed.messages)
+      ) {
+        payloads.push({
+          surfaceId: parsed.surfaceId,
+          messages: parsed.messages,
+        });
+      }
+    } catch {
+      // Not JSON or not an A2UI payload — skip
     }
   }
 
