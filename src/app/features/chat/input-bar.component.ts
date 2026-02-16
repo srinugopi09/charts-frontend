@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatStateService } from '../../core/services/chat-state.service';
 import { AgUiService } from '../../core/services/ag-ui.service';
+import { ConversationService } from '../../core/services/conversation.service';
 
 /**
  * InputBarComponent
@@ -79,6 +80,7 @@ export class InputBarComponent {
 
   protected chatState = inject(ChatStateService);
   private agUiService = inject(AgUiService);
+  private conversation = inject(ConversationService);
 
   protected inputText = signal<string>('');
   protected isStreaming = this.chatState.isStreaming;
@@ -111,9 +113,10 @@ export class InputBarComponent {
     // Add user message
     this.chatState.addUserMessage(text);
 
-    // Run agent
+    // Run agent, then sync thread state (captures threadId, refreshes sidebar)
     try {
       await this.agUiService.runAgent();
+      await this.conversation.onRunCompleted();
     } catch (error) {
       console.error('Failed to run agent:', error);
     }

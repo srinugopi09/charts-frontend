@@ -227,6 +227,16 @@ export class ChatStateService {
   }
 
   /**
+   * Replace all messages with a pre-built array (for loading history from backend)
+   */
+  loadMessages(messages: ChatMessage[]): void {
+    this.messages.set(messages);
+    this.currentStreamingMessage.set(null);
+    this.isStreaming.set(false);
+    this.clearError();
+  }
+
+  /**
    * Clear all messages (reset conversation)
    */
   clearMessages(): void {

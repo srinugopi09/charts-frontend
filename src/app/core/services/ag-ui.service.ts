@@ -38,6 +38,25 @@ export class AgUiService {
     return this.agent.threadId;
   }
 
+  /** Switch to an existing thread (destroys current HttpAgent, creates new one) */
+  switchThread(threadId: string): void {
+    this.clearStreamTimeout();
+    this.agent = new HttpAgent({
+      url: `${environment.apiUrl}${environment.agentEndpoint}`,
+      threadId,
+      headers: { 'X-User-Id': environment.userId },
+    });
+  }
+
+  /** Start a fresh thread (auto-generates new threadId) */
+  startNewThread(): void {
+    this.clearStreamTimeout();
+    this.agent = new HttpAgent({
+      url: `${environment.apiUrl}${environment.agentEndpoint}`,
+      headers: { 'X-User-Id': environment.userId },
+    });
+  }
+
   /**
    * Run the agent with current messages and shared state
    * Uses HttpAgent from @ag-ui/client to handle request formatting
