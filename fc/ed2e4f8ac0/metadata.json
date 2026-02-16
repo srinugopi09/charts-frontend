@@ -2,9 +2,10 @@
   "cli_version": "0.4.2",
   "checkpoint_id": "fced2e4f8ac0",
   "strategy": "manual-commit",
-  "branch": "feature/conversation-persistence-phase3",
-  "checkpoints_count": 1,
+  "branch": "code-cleanup-2",
+  "checkpoints_count": 3,
   "files_touched": [
+    "src/app/a2ui-catalog/dashboard/composite-dashboard.component.ts",
     "src/app/core/models/thread.models.ts",
     "src/app/core/services/ag-ui.service.ts",
     "src/app/core/services/chat-state.service.ts",
@@ -23,13 +24,20 @@
       "context": "/fc/ed2e4f8ac0/0/context.md",
       "content_hash": "/fc/ed2e4f8ac0/0/content_hash.txt",
       "prompt": "/fc/ed2e4f8ac0/0/prompt.txt"
+    },
+    {
+      "metadata": "/fc/ed2e4f8ac0/1/metadata.json",
+      "transcript": "/fc/ed2e4f8ac0/1/full.jsonl",
+      "context": "/fc/ed2e4f8ac0/1/context.md",
+      "content_hash": "/fc/ed2e4f8ac0/1/content_hash.txt",
+      "prompt": "/fc/ed2e4f8ac0/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 22,
-    "cache_creation_tokens": 155647,
-    "cache_read_tokens": 1288967,
-    "output_tokens": 137,
-    "api_call_count": 13
+    "input_tokens": 123,
+    "cache_creation_tokens": 437554,
+    "cache_read_tokens": 6608709,
+    "output_tokens": 1027,
+    "api_call_count": 88
   }
 }
