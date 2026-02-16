@@ -91,3 +91,58 @@ Create a git commit by analyzing staged and unstaged changes, drafting a concise
 
 3. If the user provide...
 
+### Prompt 15
+
+create a seperate branch for phase-2 from the current branch
+
+### Prompt 16
+
+yes
+
+### Prompt 17
+
+look at the chat pannel, how the text is rendering and also visulization is not rendering
+
+### Prompt 18
+
+[Image: original 3430x1812, displayed at 2000x1057. Multiply coordinates by 1.72 to map to original image.]
+
+### Prompt 19
+
+[Request interrupted by user for tool use]
+
+### Prompt 20
+
+tell me what should I inform to backend to fix this
+
+### Prompt 21
+
+restart the server, backend has fixed, observe the logs
+
+### Prompt 22
+
+kill the server that is running 4200, it should run on 4201. not sure why it is keep running on 4200 instead of 4201
+
+### Prompt 23
+
+all let's commit the change and push before move onto next phase-3
+
+### Prompt 24
+
+Base directory for this skill: /Users/vasu/Documents/git/charts-frontend/.claude/skills/commit
+
+# Commit
+
+Create a git commit by analyzing staged and unstaged changes, drafting a concise commit message, and committing.
+
+## Workflow
+
+1. Run in parallel:
+   - `git status` (never use `-uall`)
+   - `git diff` and `git diff --cached` to see all changes
+   - `git log --oneline -10` to match the repo's commit style
+
+2. If there are no changes to commit, inform the user and stop.
+
+3. If the user provide...
+

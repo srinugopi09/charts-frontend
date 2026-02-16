@@ -3,32 +3,35 @@
   "checkpoint_id": "fced2e4f8ac0",
   "session_id": "a23c3e2c-a1ac-42fb-8698-fc61c4dfc95b",
   "strategy": "manual-commit",
-  "created_at": "2026-02-15T20:35:38.935747Z",
-  "branch": "feature/conversation-persistence",
+  "created_at": "2026-02-16T00:23:39.281259Z",
+  "branch": "feature/conversation-persistence-phase2",
   "checkpoints_count": 1,
   "files_touched": [
-    "src/app/core/models/thread.models.ts",
     "src/app/core/services/ag-ui.service.ts",
-    "src/app/core/services/thread.service.ts",
-    "src/environments/environment.prod.ts",
-    "src/environments/environment.ts"
+    "src/app/core/services/chat-state.service.ts",
+    "src/app/core/services/conversation.service.ts",
+    "src/app/features/chat/input-bar.component.ts",
+    "src/app/features/layout/header-bar.component.ts",
+    "src/app/features/layout/thread-drawer.component.ts"
   ],
   "agent": "Claude Code",
-  "transcript_identifier_at_start": "861187b8-8a99-4bb7-896e-c8a4db9cdf55",
+  "transcript_identifier_at_start": "5832710a-c31b-44d7-9252-21424f751ffa",
+  "checkpoint_transcript_start": 510,
+  "transcript_lines_at_start": 510,
   "token_usage": {
-    "input_tokens": 73,
-    "cache_creation_tokens": 307603,
-    "cache_read_tokens": 2481364,
-    "output_tokens": 3616,
-    "api_call_count": 42
+    "input_tokens": 67,
+    "cache_creation_tokens": 464408,
+    "cache_read_tokens": 5923830,
+    "output_tokens": 668,
+    "api_call_count": 48
   },
   "initial_attribution": {
-    "calculated_at": "2026-02-15T20:35:38.801247Z",
-    "agent_lines": 195,
+    "calculated_at": "2026-02-16T00:23:39.070326Z",
+    "agent_lines": 395,
     "human_added": 0,
     "human_modified": 0,
     "human_removed": 0,
-    "total_committed": 195,
+    "total_committed": 395,
     "agent_percentage": 100
   }
 }

@@ -327,3 +327,89 @@ Create a git commit by analyzing staged and unstaged changes, drafting a concise
 - Never use interactive flags (`-i`)
 - Never commit `.env`, credentials, or secrets
 - Do not append `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` to the message
+
+---
+
+create a seperate branch for phase-2 from the current branch
+
+---
+
+yes
+
+---
+
+look at the chat pannel, how the text is rendering and also visulization is not rendering
+
+---
+
+[Image: original 3430x1812, displayed at 2000x1057. Multiply coordinates by 1.72 to map to original image.]
+
+---
+
+[Request interrupted by user for tool use]
+
+---
+
+tell me what should I inform to backend to fix this
+
+---
+
+restart the server, backend has fixed, observe the logs
+
+---
+
+kill the server that is running 4200, it should run on 4201. not sure why it is keep running on 4200 instead of 4201
+
+---
+
+all let's commit the change and push before move onto next phase-3
+
+---
+
+Base directory for this skill: /Users/vasu/Documents/git/charts-frontend/.claude/skills/commit
+
+# Commit
+
+Create a git commit by analyzing staged and unstaged changes, drafting a concise commit message, and committing.
+
+## Workflow
+
+1. Run in parallel:
+   - `git status` (never use `-uall`)
+   - `git diff` and `git diff --cached` to see all changes
+   - `git log --oneline -10` to match the repo's commit style
+
+2. If there are no changes to commit, inform the user and stop.
+
+3. If the user provided a message argument, use it as the commit message. Otherwise, draft one:
+   - Summarize the nature of the change (feature, fix, refactor, docs, test, etc.)
+   - Use imperative mood ("Add X" not "Added X")
+   - Keep the first line under 72 characters
+   - Add a blank line and brief body only if the change is non-trivial
+   - Focus on *why*, not *what*
+   - Do not add co-authored by
+
+4. Stage relevant files by name (avoid `git add -A` or `git add .`). Skip files that look like secrets (`.env`, credentials, keys).
+
+5. Commit using a HEREDOC for proper formatting:
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   Commit message here
+
+   
+   EOF
+   )"
+   ```
+
+6. Run `git status` after committing to verify success.
+
+7. If a pre-commit hook fails: fix the issue, re-stage, and create a **new** commit (never `--amend`).
+
+## Rules
+
+- Never `git push` unless the user explicitly asks
+- Never amend, force-push, or run destructive git commands
+- Never skip hooks (`--no-verify`)
+- Never use interactive flags (`-i`)
+- Never commit `.env`, credentials, or secrets
+- Do not append `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` to the message
