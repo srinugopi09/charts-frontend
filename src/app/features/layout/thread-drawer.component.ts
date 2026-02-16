@@ -5,9 +5,11 @@ import {
   output,
   inject,
   signal,
-  OnInit,
+  ElementRef,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ConversationService } from '../../core/services/conversation.service';
 import { Thread } from '../../core/models/thread.models';
 
@@ -21,7 +23,7 @@ import { Thread } from '../../core/models/thread.models';
   selector: 'app-thread-drawer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     @if (isOpen()) {
       <!-- Backdrop -->
@@ -80,13 +82,38 @@ import { Thread } from '../../core/models/thread.models';
                 [class.border-l-blue-500]="thread.id === conversation.activeThreadId()"
                 (click)="onSelectThread(thread)">
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-gray-800 truncate">
-                    {{ thread.title || 'Untitled' }}
-                  </p>
+                  @if (editingThreadId() === thread.id) {
+                    <!-- Inline title edit -->
+                    <input
+                      #editInput
+                      type="text"
+                      [ngModel]="editingTitle()"
+                      (ngModelChange)="editingTitle.set($event)"
+                      (keydown.enter)="saveTitle(thread)"
+                      (keydown.escape)="cancelEdit()"
+                      (blur)="saveTitle(thread)"
+                      (click)="$event.stopPropagation()"
+                      class="w-full text-sm font-medium text-gray-800 bg-white border border-blue-400 rounded px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  } @else {
+                    <p class="text-sm font-medium text-gray-800 truncate"
+                       (dblclick)="startEdit($event, thread)">
+                      {{ thread.title || 'Untitled' }}
+                    </p>
+                  }
                   <p class="text-xs text-gray-400 mt-0.5">
                     {{ formatDate(thread.updated_at) }}
                   </p>
                 </div>
+                <!-- Edit button -->
+                <button
+                  (click)="startEdit($event, thread)"
+                  class="p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-blue-100 transition-all"
+                  [class.hidden]="editingThreadId() === thread.id"
+                  aria-label="Rename conversation">
+                  <svg class="w-4 h-4 text-gray-400 hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
                 <!-- Delete button -->
                 <button
                   (click)="onDeleteThread($event, thread)"
@@ -114,11 +141,14 @@ import { Thread } from '../../core/models/thread.models';
   `],
 })
 export class ThreadDrawerComponent {
+  @ViewChild('editInput') editInputRef?: ElementRef<HTMLInputElement>;
+
   readonly isOpen = input.required<boolean>();
   readonly closed = output<void>();
 
   protected conversation = inject(ConversationService);
-  protected confirmingDelete = signal<string | null>(null);
+  protected editingThreadId = signal<string | null>(null);
+  protected editingTitle = signal('');
 
   close(): void {
     this.closed.emit();
@@ -130,12 +160,35 @@ export class ThreadDrawerComponent {
   }
 
   async onSelectThread(thread: Thread): Promise<void> {
+    // Don't navigate if we're editing this thread's title
+    if (this.editingThreadId() === thread.id) return;
+
     if (thread.id === this.conversation.activeThreadId()) {
       this.close();
       return;
     }
     await this.conversation.switchThread(thread.id);
     this.close();
+  }
+
+  startEdit(event: Event, thread: Thread): void {
+    event.stopPropagation();
+    this.editingThreadId.set(thread.id);
+    this.editingTitle.set(thread.title || '');
+    // Focus the input after Angular renders it
+    setTimeout(() => this.editInputRef?.nativeElement.focus(), 0);
+  }
+
+  async saveTitle(thread: Thread): Promise<void> {
+    const newTitle = this.editingTitle().trim();
+    this.editingThreadId.set(null);
+    if (newTitle && newTitle !== (thread.title || '')) {
+      await this.conversation.renameThread(thread.id, newTitle);
+    }
+  }
+
+  cancelEdit(): void {
+    this.editingThreadId.set(null);
   }
 
   async onDeleteThread(event: Event, thread: Thread): Promise<void> {

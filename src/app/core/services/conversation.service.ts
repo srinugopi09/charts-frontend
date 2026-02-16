@@ -109,6 +109,20 @@ export class ConversationService {
     this.clearPersistedThread();
   }
 
+  /** Rename a thread title */
+  async renameThread(threadId: string, title: string): Promise<void> {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    try {
+      await firstValueFrom(this.threadService.updateThread(threadId, trimmed));
+      this.threads.update((list) =>
+        list.map((t) => (t.id === threadId ? { ...t, title: trimmed } : t)),
+      );
+    } catch (error) {
+      console.error('Failed to rename thread:', error);
+    }
+  }
+
   /** Delete a thread from backend and local state */
   async deleteThread(threadId: string): Promise<void> {
     try {
@@ -127,15 +141,55 @@ export class ConversationService {
   /**
    * Called after a successful agent run to sync thread state.
    * - Captures the auto-generated threadId for new conversations
+   * - Auto-titles new threads from the first user message
    * - Refreshes the thread list so new threads appear in sidebar
    */
   async onRunCompleted(): Promise<void> {
     const currentThreadId = this.agUiService.threadId;
-    if (!this.activeThreadId() && currentThreadId) {
+    const isNewThread = !this.activeThreadId() && !!currentThreadId;
+
+    if (isNewThread) {
       this.activeThreadId.set(currentThreadId);
       this.persistActiveThread(currentThreadId);
     }
+
     await this.loadThreads();
+
+    // Auto-title: if this was a new thread, generate a title from the first user message
+    if (isNewThread) {
+      const firstUserMsg = this.chatState
+        .messages()
+        .find((m) => m.role === 'user');
+      if (firstUserMsg?.content) {
+        const title = this.generateTitle(firstUserMsg.content);
+        try {
+          await firstValueFrom(
+            this.threadService.updateThread(currentThreadId, title),
+          );
+          // Update local thread list with new title
+          this.threads.update((list) =>
+            list.map((t) =>
+              t.id === currentThreadId ? { ...t, title } : t,
+            ),
+          );
+        } catch (error) {
+          console.error('Failed to auto-title thread:', error);
+        }
+      }
+    }
+  }
+
+  /**
+   * Generate a short title from a user message.
+   * Truncates to ~40 characters at a word boundary.
+   */
+  private generateTitle(message: string): string {
+    const cleaned = message.replace(/\s+/g, ' ').trim();
+    if (cleaned.length <= 40) return cleaned;
+
+    const truncated = cleaned.substring(0, 40);
+    const lastSpace = truncated.lastIndexOf(' ');
+    return (lastSpace > 20 ? truncated.substring(0, lastSpace) : truncated) + '...';
   }
 
   private persistActiveThread(threadId: string): void {
