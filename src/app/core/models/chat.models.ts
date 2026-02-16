@@ -45,20 +45,3 @@ export interface ToolCallInfo {
   /** Result returned by the tool */
   result?: any;
 }
-
-/**
- * Represents a chat session
- */
-export interface ChatSession {
-  /** Unique session identifier */
-  sessionId: string;
-
-  /** Thread identifier for conversation continuity */
-  threadId: string;
-
-  /** When the session was created */
-  createdAt: Date;
-
-  /** Timestamp of the last message in the session */
-  lastMessageAt: Date;
-}

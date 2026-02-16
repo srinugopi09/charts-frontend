@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, inject, Optional } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SplitViewComponent } from '../layout/split-view.component';
 
