@@ -5,7 +5,6 @@
   "branch": "code-cleanup-2",
   "checkpoints_count": 3,
   "files_touched": [
-    "src/app/a2ui-catalog/dashboard/composite-dashboard.component.ts",
     "src/app/core/models/thread.models.ts",
     "src/app/core/services/ag-ui.service.ts",
     "src/app/core/services/chat-state.service.ts",
@@ -34,10 +33,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 123,
-    "cache_creation_tokens": 437554,
-    "cache_read_tokens": 6608709,
-    "output_tokens": 1027,
-    "api_call_count": 88
+    "input_tokens": 45,
+    "cache_creation_tokens": 176839,
+    "cache_read_tokens": 2754519,
+    "output_tokens": 277,
+    "api_call_count": 26
   }
 }

@@ -279,3 +279,23 @@ ARGUMENTS: Navigate to http://localhost:4200, ask a question that would trigger 
 ---
 
 commit the changes
+
+---
+
+let's move onto 4th issue
+
+---
+
+can you talk about issue 5th
+
+---
+
+I understood the issue but didn't understand the resolution, can you explain clearly
+
+---
+
+yes
+
+---
+
+let's commit and push. mark as done in the plan for the firt 5 issues

@@ -70,3 +70,23 @@ agent-browser open https://example.com...
 
 commit the changes
 
+### Prompt 10
+
+let's move onto 4th issue
+
+### Prompt 11
+
+can you talk about issue 5th
+
+### Prompt 12
+
+I understood the issue but didn't understand the resolution, can you explain clearly
+
+### Prompt 13
+
+yes
+
+### Prompt 14
+
+let's commit and push. mark as done in the plan for the firt 5 issues
+
