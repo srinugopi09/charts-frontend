@@ -3,31 +3,39 @@
   "checkpoint_id": "fced2e4f8ac0",
   "session_id": "a23c3e2c-a1ac-42fb-8698-fc61c4dfc95b",
   "strategy": "manual-commit",
-  "created_at": "2026-02-16T02:47:31.033048Z",
+  "created_at": "2026-02-16T03:12:11.673911Z",
   "branch": "feature/conversation-persistence-phase3",
   "checkpoints_count": 1,
   "files_touched": [
+    "src/app/core/models/thread.models.ts",
+    "src/app/core/services/ag-ui.service.ts",
+    "src/app/core/services/chat-state.service.ts",
     "src/app/core/services/conversation.service.ts",
-    "src/app/features/layout/thread-drawer.component.ts"
+    "src/app/core/services/thread.service.ts",
+    "src/app/features/chat/input-bar.component.ts",
+    "src/app/features/layout/header-bar.component.ts",
+    "src/app/features/layout/thread-drawer.component.ts",
+    "src/environments/environment.prod.ts",
+    "src/environments/environment.ts"
   ],
   "agent": "Claude Code",
-  "transcript_identifier_at_start": "64d19c5b-9c3c-48c0-aeb4-6aacb2883bfb",
-  "checkpoint_transcript_start": 777,
-  "transcript_lines_at_start": 777,
+  "transcript_identifier_at_start": "16d59062-4108-4d74-b02e-21532ae4d209",
+  "checkpoint_transcript_start": 909,
+  "transcript_lines_at_start": 909,
   "token_usage": {
-    "input_tokens": 38,
-    "cache_creation_tokens": 178680,
-    "cache_read_tokens": 1494297,
-    "output_tokens": 253,
-    "api_call_count": 25
+    "input_tokens": 22,
+    "cache_creation_tokens": 155647,
+    "cache_read_tokens": 1288967,
+    "output_tokens": 137,
+    "api_call_count": 13
   },
   "initial_attribution": {
-    "calculated_at": "2026-02-16T02:47:30.796943Z",
-    "agent_lines": 72,
-    "human_added": 40,
-    "human_modified": 1,
+    "calculated_at": "2026-02-16T03:12:11.425531Z",
+    "agent_lines": 20,
+    "human_added": 0,
+    "human_modified": 0,
     "human_removed": 0,
-    "total_committed": 113,
-    "agent_percentage": 63.716814159292035
+    "total_committed": 20,
+    "agent_percentage": 100
   }
 }

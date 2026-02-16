@@ -5,8 +5,16 @@
   "branch": "feature/conversation-persistence-phase3",
   "checkpoints_count": 1,
   "files_touched": [
+    "src/app/core/models/thread.models.ts",
+    "src/app/core/services/ag-ui.service.ts",
+    "src/app/core/services/chat-state.service.ts",
     "src/app/core/services/conversation.service.ts",
-    "src/app/features/layout/thread-drawer.component.ts"
+    "src/app/core/services/thread.service.ts",
+    "src/app/features/chat/input-bar.component.ts",
+    "src/app/features/layout/header-bar.component.ts",
+    "src/app/features/layout/thread-drawer.component.ts",
+    "src/environments/environment.prod.ts",
+    "src/environments/environment.ts"
   ],
   "sessions": [
     {
@@ -18,10 +26,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 38,
-    "cache_creation_tokens": 178680,
-    "cache_read_tokens": 1494297,
-    "output_tokens": 253,
-    "api_call_count": 25
+    "input_tokens": 22,
+    "cache_creation_tokens": 155647,
+    "cache_read_tokens": 1288967,
+    "output_tokens": 137,
+    "api_call_count": 13
   }
 }

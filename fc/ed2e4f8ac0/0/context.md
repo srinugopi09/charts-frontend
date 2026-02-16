@@ -192,3 +192,38 @@ Create a git commit by analyzing staged and unstaged changes, drafting a concise
 
 3. If the user provide...
 
+### Prompt 31
+
+let's move onto next phase
+
+### Prompt 32
+
+vizulaizations are not rendering for the history mesages when loaded, only text is being rendered. here is the sample response from the backend from network tab- {"thread_id":"0c84a437-8916-42b0-8118-514888a42879","messages":[{"role":"user","content":"Compare customer satisfaction scores across departments","message_id":null,"tool_call_name":null,"tool_call_id":null,"event_data":null},{"role":"assistant","content":"","message_id":null,"tool_call_name":"list_tables","tool_call_id":"adk-7d45aec0-4...
+
+### Prompt 33
+
+awesome. everything looks good.
+
+### Prompt 34
+
+yes
+
+### Prompt 35
+
+Base directory for this skill: /Users/vasu/Documents/git/charts-frontend/.claude/skills/commit
+
+# Commit
+
+Create a git commit by analyzing staged and unstaged changes, drafting a concise commit message, and committing.
+
+## Workflow
+
+1. Run in parallel:
+   - `git status` (never use `-uall`)
+   - `git diff` and `git diff --cached` to see all changes
+   - `git log --oneline -10` to match the repo's commit style
+
+2. If there are no changes to commit, inform the user and stop.
+
+3. If the user provide...
+
