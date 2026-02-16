@@ -2,14 +2,10 @@
   "cli_version": "0.4.2",
   "checkpoint_id": "fced2e4f8ac0",
   "strategy": "manual-commit",
-  "branch": "feature/conversation-persistence-phase2",
+  "branch": "feature/conversation-persistence-phase3",
   "checkpoints_count": 1,
   "files_touched": [
-    "src/app/core/services/ag-ui.service.ts",
-    "src/app/core/services/chat-state.service.ts",
     "src/app/core/services/conversation.service.ts",
-    "src/app/features/chat/input-bar.component.ts",
-    "src/app/features/layout/header-bar.component.ts",
     "src/app/features/layout/thread-drawer.component.ts"
   ],
   "sessions": [
@@ -22,10 +18,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 67,
-    "cache_creation_tokens": 464408,
-    "cache_read_tokens": 5923830,
-    "output_tokens": 668,
-    "api_call_count": 48
+    "input_tokens": 38,
+    "cache_creation_tokens": 178680,
+    "cache_read_tokens": 1494297,
+    "output_tokens": 253,
+    "api_call_count": 25
   }
 }

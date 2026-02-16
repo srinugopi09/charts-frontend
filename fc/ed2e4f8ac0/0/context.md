@@ -146,3 +146,49 @@ Create a git commit by analyzing staged and unstaged changes, drafting a concise
 
 3. If the user provide...
 
+### Prompt 25
+
+This session is being continued from a previous conversation that ran out of context. The summary below covers the earlier portion of the conversation.
+
+Analysis:
+Let me chronologically analyze the conversation:
+
+1. User shared a "Frontend Integration Guide — Conversation Persistence" document and asked me to identify flaws and challenge the design.
+
+2. I explored the codebase thoroughly to understand the current architecture (AgUiService, ChatStateService, A2UIEventService, etc.) and provided...
+
+### Prompt 26
+
+[Request interrupted by user for tool use]
+
+### Prompt 27
+
+can you provide a way to edit the title of the thread ?
+
+### Prompt 28
+
+looks good.
+
+### Prompt 29
+
+yes
+
+### Prompt 30
+
+Base directory for this skill: /Users/vasu/Documents/git/charts-frontend/.claude/skills/commit
+
+# Commit
+
+Create a git commit by analyzing staged and unstaged changes, drafting a concise commit message, and committing.
+
+## Workflow
+
+1. Run in parallel:
+   - `git status` (never use `-uall`)
+   - `git diff` and `git diff --cached` to see all changes
+   - `git log --oneline -10` to match the repo's commit style
+
+2. If there are no changes to commit, inform the user and stop.
+
+3. If the user provide...
+
