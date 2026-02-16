@@ -299,3 +299,27 @@ yes
 ---
 
 let's commit and push. mark as done in the plan for the firt 5 issues
+
+---
+
+explain the next one
+
+---
+
+yes
+
+---
+
+yes
+
+---
+
+yes
+
+---
+
+let's skip 9 I will do it later. explain me 10
+
+---
+
+before you apply this, commit the changes and push

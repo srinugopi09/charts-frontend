@@ -3,13 +3,15 @@
   "checkpoint_id": "fced2e4f8ac0",
   "strategy": "manual-commit",
   "branch": "code-cleanup-2",
-  "checkpoints_count": 3,
+  "checkpoints_count": 4,
   "files_touched": [
     "src/app/core/models/thread.models.ts",
+    "src/app/core/services/a2ui-event.service.ts",
     "src/app/core/services/ag-ui.service.ts",
     "src/app/core/services/chat-state.service.ts",
     "src/app/core/services/conversation.service.ts",
     "src/app/core/services/thread.service.ts",
+    "src/app/features/canvas/canvas-panel.component.ts",
     "src/app/features/chat/input-bar.component.ts",
     "src/app/features/layout/header-bar.component.ts",
     "src/app/features/layout/thread-drawer.component.ts",
@@ -33,10 +35,10 @@
     }
   ],
   "token_usage": {
-    "input_tokens": 45,
-    "cache_creation_tokens": 176839,
-    "cache_read_tokens": 2754519,
-    "output_tokens": 277,
-    "api_call_count": 26
+    "input_tokens": 65,
+    "cache_creation_tokens": 193738,
+    "cache_read_tokens": 5127526,
+    "output_tokens": 525,
+    "api_call_count": 40
   }
 }

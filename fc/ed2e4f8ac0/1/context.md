@@ -90,3 +90,27 @@ yes
 
 let's commit and push. mark as done in the plan for the firt 5 issues
 
+### Prompt 15
+
+explain the next one
+
+### Prompt 16
+
+yes
+
+### Prompt 17
+
+yes
+
+### Prompt 18
+
+yes
+
+### Prompt 19
+
+let's skip 9 I will do it later. explain me 10
+
+### Prompt 20
+
+before you apply this, commit the changes and push
+
