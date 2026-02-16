@@ -78,6 +78,7 @@ export class A2UIEventService implements OnDestroy {
   readonly catalogValidationError = signal<string | null>(null);
 
   // Ordered list of surfaceIds as they arrive (for rendering all visualizations)
+  private readonly MAX_SURFACES = 20;
   readonly surfaceHistory = signal<string[]>([]);
 
   // Computed signal that gets the actual surface from the processor
@@ -162,7 +163,19 @@ export class A2UIEventService implements OnDestroy {
 
       // 4. Update the current surface ID (triggers computed signal)
       this.currentSurfaceId.set(surfaceId);
-      this.surfaceHistory.update((ids) => [...ids, surfaceId]);
+      this.surfaceHistory.update((ids) => {
+        const updated = [...ids, surfaceId];
+        if (updated.length > this.MAX_SURFACES) {
+          // Evict oldest surfaces from the MessageProcessor to free memory
+          const evicted = updated.slice(0, updated.length - this.MAX_SURFACES);
+          const surfaces = this.messageProcessor.getSurfaces() as Map<string, any>;
+          for (const id of evicted) {
+            surfaces.delete(id);
+          }
+          return updated.slice(-this.MAX_SURFACES);
+        }
+        return updated;
+      });
       this.catalogValidationError.set(null);
     } catch (error: any) {
       console.error('Failed to process A2UI messages:', error);

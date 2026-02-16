@@ -180,6 +180,8 @@ export class ThreadDrawerComponent {
   }
 
   async saveTitle(thread: Thread): Promise<void> {
+    // Guard against double-fire: Enter key removes the input, which triggers blur
+    if (this.editingThreadId() === null) return;
     const newTitle = this.editingTitle().trim();
     this.editingThreadId.set(null);
     if (newTitle && newTitle !== (thread.title || '')) {

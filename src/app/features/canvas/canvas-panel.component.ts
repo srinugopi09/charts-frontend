@@ -110,7 +110,9 @@ export class CanvasPanelComponent {
     try {
       await this.agUiService.runAgent();
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to run agent';
       console.error('Failed to run agent:', error);
+      this.chatState.setError(errorMsg);
     }
   }
 }
