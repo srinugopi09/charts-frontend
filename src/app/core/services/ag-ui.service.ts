@@ -147,11 +147,6 @@ export class AgUiService {
    */
   private buildSubscriber(): AgentSubscriber {
     return {
-      // ── Logging (fires for every event) ────────────────────────
-      onEvent: ({ event }) => {
-        console.log('AG-UI Event:', event.type, event);
-      },
-
       // ── Lifecycle ─────────────────────────────────────────────
       onRunStartedEvent: () => {
         this.chatState.isStreaming.set(true);

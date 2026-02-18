@@ -60,7 +60,6 @@ export function mapBackendMessages(messages: BackendMessage[]): ChatMessage[] {
         content: msg.content,
         timestamp: new Date(),
         isStreaming: false,
-        a2uiPayload: null,
         toolCalls: null,
       });
       continue;
@@ -74,7 +73,6 @@ export function mapBackendMessages(messages: BackendMessage[]): ChatMessage[] {
         content: msg.content,
         timestamp: new Date(),
         isStreaming: false,
-        a2uiPayload: null,
         toolCalls: null,
       });
       continue;

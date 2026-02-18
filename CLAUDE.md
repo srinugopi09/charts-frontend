@@ -17,29 +17,48 @@ Conversational analytics app: users ask natural-language questions about data, r
 
 ## Architecture
 
-- **State:** Signal-based services (ChatStateService, SharedStateService, AgUiService, A2UIEventService, ChartAdapterService)
-- **Layout:** Responsive split-view — single ng-content per slot, CSS media queries for breakpoints
+### Services (all signal-based, providedIn: 'root')
+
+| Service | Purpose |
+|---------|---------|
+| `ChatStateService` | Message array, streaming state, deduplication |
+| `AgUiService` | HttpAgent wrapper, SSE streaming, chart JSON detection |
+| `A2UIEventService` | A2UI payload processing, surface history, drill-down actions |
+| `SharedStateService` | AG-UI agent context (synced bi-directionally via STATE_DELTA) |
+| `ConversationService` | Thread CRUD, auto-titling, history replay |
+| `ThreadService` | REST client for /api/threads endpoints |
+
+### Layout
+
+- Responsive split-view — single ng-content per slot, CSS media queries for breakpoints
   - Desktop (>=1024px): side-by-side with draggable divider (native pointer events)
   - Tablet (768px-1023px): tab switching
   - Mobile (<768px): external toggle button
-- **A2UI Catalog:** Graph, KPICard, DataTable, RAGIndicator, InsightCard, CompositeDashboard
-- **Backend:** FastAPI at localhost:8080
+
+### A2UI Catalog Components
+
+Graph, KPICard, DataTable, RAGIndicator, InsightCard, CompositeDashboard — all extend `CatalogBaseComponent`, registered in `catalog.config.ts`.
+
+### Data Flow
+
+```
+User Input → ChatStateService.addUserMessage() → AgUiService.runAgent() (SSE)
+  ← AG-UI events → ChatStateService (messages) + SharedStateService (context)
+  ← A2UI payloads → A2UIEventService → MessageProcessor → Canvas surfaces
+  ← User clicks chart → drill-down action → AgUiService.runAgent() (loop)
+Post-run: ConversationService syncs thread + auto-titles via runCompleted$
+```
 
 ## Key Patterns
 
 ### A2UI DynamicComponent Property Access (CRITICAL)
 
-All A2UI catalog components extend `DynamicComponent`. Properties are NOT class properties — they must be accessed via `this.component().properties`:
+All catalog components extend `CatalogBaseComponent` (which extends `DynamicComponent`). Properties are NOT class properties — access via `this.component().properties`:
 
 ```typescript
-export class MyComponent extends DynamicComponent {
-  private getProp<T>(key: string, defaultValue?: T): T | undefined {
-    const props: any = this.component().properties;
-    return props[key] !== undefined ? props[key] : defaultValue;
-  }
-
+export class MyComponent extends CatalogBaseComponent {
   get title(): string | undefined {
-    return this.getProp<string>('title');
+    return this.getProp<string>('title'); // inherited from CatalogBaseComponent
   }
 }
 ```
@@ -64,6 +83,10 @@ this.sendAction({
 - A2UI visualization payloads arrive via TOOL_CALL_RESULT (primary) or CUSTOM events
 - Chart JSON filtering: backend may send chart config as a TEXT_MESSAGE — detected and removed in TEXT_MESSAGE_END handler
 - Stale reference warning: `currentStreamingMessage()` holds original object; look up actual message from `messages()` array by ID
+
+### Chart.js Shared Theme
+
+Modern chart styling (tooltip, legend, scale, font configs) is defined as constants at the top of `graph.component.ts`. Each `buildModern*Config()` method spreads these shared constants and only overrides chart-type-specific properties.
 
 ### Responsive Layout (ng-content)
 
@@ -105,10 +128,45 @@ Guards:
 - Message history capped at 50 messages sent to agent
 - Chart.js canvases must be destroyed and recreated (memory leak prevention)
 - KPI values: handle currency prefix symbols ($, £, €) in formattedValue to avoid double display
+- Visualizations flow through A2UIEventService surface system (NOT through chat messages)
+- SharedStateService types (VisualizationState, QueryState) are populated by the agent via STATE_DELTA, not by frontend code
+- RelativeTimePipe is the single source for relative date formatting (used by both chat bubbles and thread drawer)
 
 ## Project Structure
 
-See `frontend-blueprint.md` for full specification.
+```
+src/app/
+├── a2ui-catalog/          # A2UI visualization components
+│   ├── catalog-base.component.ts   # Base class with getProp<T>() helper
+│   ├── catalog.config.ts           # Provider registration
+│   ├── chart/graph.component.ts    # Chart.js renderer (bar/line/pie/etc.)
+│   ├── kpi/kpi-card.component.ts
+│   ├── table/data-table.component.ts
+│   ├── dashboard/composite-dashboard.component.ts
+│   ├── status/rag-indicator.component.ts
+│   └── text/insight-card.component.ts
+├── core/
+│   ├── config/feature-flags.ts
+│   ├── models/             # TypeScript interfaces
+│   │   ├── chat.models.ts          # ChatMessage, ToolCallInfo
+│   │   ├── a2ui.models.ts          # ChartData, ChartDataset, ChartType
+│   │   ├── shared-state.models.ts  # AgentContext, VisualizationState, QueryState
+│   │   └── thread.models.ts        # Thread DTOs, mapBackendMessages()
+│   └── services/
+│       ├── chat-state.service.ts
+│       ├── ag-ui.service.ts
+│       ├── a2ui-event.service.ts
+│       ├── shared-state.service.ts
+│       ├── conversation.service.ts
+│       └── thread.service.ts
+├── features/
+│   ├── layout/             # SplitView, HeaderBar, ThreadDrawer, MobileToggle
+│   ├── chat/               # ChatPanel, MessageList, MessageBubble, InputBar, TypingIndicator
+│   └── canvas/             # CanvasPanel, CanvasToolbar, CanvasEmptyState
+├── shared/                 # RelativeTimePipe, AutoScrollDirective, LoadingSkeleton
+├── app.ts                  # Root component
+└── app.config.ts           # Bootstrap providers
+```
 
 ## Commands
 

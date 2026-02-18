@@ -1,7 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { randomUUID } from '@ag-ui/client';
 import { ChatMessage, ToolCallInfo } from '../models/chat.models';
-import { A2UISurface } from '../models/a2ui.models';
 
 /**
  * ChatStateService
@@ -20,19 +19,7 @@ export class ChatStateService {
   readonly error = signal<string | null>(null);
 
   // Computed signals
-  readonly lastVisualization = computed(() => {
-    const msgs = this.messages();
-    // Find the most recent message with an A2UI payload
-    for (let i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].a2uiPayload !== null) {
-        return msgs[i];
-      }
-    }
-    return null;
-  });
-
   readonly messageCount = computed(() => this.messages().length);
-
   readonly hasActiveConversation = computed(() => this.messageCount() > 0);
 
   /**
@@ -45,7 +32,6 @@ export class ChatStateService {
       content: content.trim(),
       timestamp: new Date(),
       isStreaming: false,
-      a2uiPayload: null,
       toolCalls: null,
     };
 
@@ -58,7 +44,6 @@ export class ChatStateService {
    * Guards against creating a duplicate message when one is already streaming.
    */
   startAssistantMessage(): void {
-    // If there's already an active streaming message, finalize it first
     if (this.currentStreamingMessage()) {
       this.finalizeStreamingMessage();
     }
@@ -69,7 +54,6 @@ export class ChatStateService {
       content: '',
       timestamp: new Date(),
       isStreaming: true,
-      a2uiPayload: null,
       toolCalls: null,
     };
 
@@ -116,7 +100,6 @@ export class ChatStateService {
       );
 
       if (isDuplicate) {
-        // Remove the duplicate message instead of finalizing it
         this.messages.update((msgs) =>
           msgs.filter((m) => m.id !== current.id)
         );
@@ -126,8 +109,8 @@ export class ChatStateService {
       }
     }
 
-    // Remove empty assistant messages (no content and no tool calls / a2ui payload)
-    if (!finalContent && !actualMsg?.toolCalls?.length && !actualMsg?.a2uiPayload) {
+    // Remove empty assistant messages (no content and no tool calls)
+    if (!finalContent && !actualMsg?.toolCalls?.length) {
       this.messages.update((msgs) =>
         msgs.filter((m) => m.id !== current.id)
       );
@@ -157,7 +140,6 @@ export class ChatStateService {
       msgs.map((msg) => {
         if (msg.id === current.id) {
           const existingCalls = msg.toolCalls || [];
-          // Check if this tool call already exists (by name) and update it
           const existingIndex = existingCalls.findIndex(
             (call) => call.toolName === toolInfo.toolName
           );
@@ -177,51 +159,18 @@ export class ChatStateService {
   }
 
   /**
-   * Attach an A2UI payload to the current streaming message
-   */
-  attachA2UIPayload(payload: A2UISurface): void {
-    const current = this.currentStreamingMessage();
-    if (!current) {
-      // If no streaming message, attach to the last assistant message
-      this.messages.update((msgs) => {
-        const lastAssistant = [...msgs]
-          .reverse()
-          .find((m) => m.role === 'assistant');
-        if (!lastAssistant) return msgs;
-
-        return msgs.map((msg) =>
-          msg.id === lastAssistant.id ? { ...msg, a2uiPayload: payload } : msg
-        );
-      });
-      return;
-    }
-
-    this.messages.update((msgs) =>
-      msgs.map((msg) =>
-        msg.id === current.id ? { ...msg, a2uiPayload: payload } : msg
-      )
-    );
-  }
-
-  /**
    * Remove a message by ID (e.g., chart JSON messages not meant for display)
    */
   removeMessage(messageId: string): void {
     this.messages.update((msgs) => msgs.filter((m) => m.id !== messageId));
   }
 
-  /**
-   * Set an error message
-   */
   setError(message: string): void {
     this.error.set(message);
     this.isStreaming.set(false);
     this.currentStreamingMessage.set(null);
   }
 
-  /**
-   * Clear the current error
-   */
   clearError(): void {
     this.error.set(null);
   }
@@ -246,9 +195,6 @@ export class ChatStateService {
     this.clearError();
   }
 
-  /**
-   * Generate a unique message ID using the library's uuid v4
-   */
   private generateMessageId(): string {
     return randomUUID();
   }

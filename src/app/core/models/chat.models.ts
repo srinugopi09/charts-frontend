@@ -1,5 +1,3 @@
-import { A2UISurface } from './a2ui.models';
-
 /**
  * Represents a single message in the chat conversation
  */
@@ -18,9 +16,6 @@ export interface ChatMessage {
 
   /** Whether the message is currently being streamed */
   isStreaming: boolean;
-
-  /** A2UI visualization payload if present */
-  a2uiPayload: A2UISurface | null;
 
   /** Tool calls made by the agent (for transparency) */
   toolCalls: ToolCallInfo[] | null;

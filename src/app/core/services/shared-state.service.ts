@@ -1,9 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import {
-  AgentContext,
-  VisualizationState,
-  QueryState,
-} from '../models/shared-state.models';
+import { AgentContext } from '../models/shared-state.models';
 
 /**
  * SharedStateService
@@ -15,7 +11,6 @@ import {
   providedIn: 'root',
 })
 export class SharedStateService {
-  // Core signal for agent context
   readonly agentContext = signal<AgentContext>({
     currentVisualization: null,
     lastQuery: null,
@@ -36,42 +31,12 @@ export class SharedStateService {
 
   /**
    * Sync the Angular signal from the library's auto-patched agent state.
-   * The @ag-ui/client library applies full RFC 6902 JSON Patch operations
+   * The @ag-ui/client library applies RFC 6902 JSON Patch operations
    * via fast-json-patch internally — we just adopt the result.
    */
   syncFromAgent(state: any): void {
     if (!state || typeof state !== 'object') return;
     this.agentContext.set(state as AgentContext);
-  }
-
-  /**
-   * Set the current visualization state
-   */
-  setVisualization(viz: VisualizationState): void {
-    this.agentContext.update((current) => ({
-      ...current,
-      currentVisualization: viz,
-    }));
-  }
-
-  /**
-   * Set the last query state
-   */
-  setLastQuery(query: QueryState): void {
-    this.agentContext.update((current) => ({
-      ...current,
-      lastQuery: query,
-    }));
-  }
-
-  /**
-   * Update active filters
-   */
-  updateFilters(filters: Record<string, any>): void {
-    this.agentContext.update((current) => ({
-      ...current,
-      activeFilters: { ...current.activeFilters, ...filters },
-    }));
   }
 
   /**
@@ -86,5 +51,4 @@ export class SharedStateService {
       conversationIntent: null,
     });
   }
-
 }

@@ -12,18 +12,19 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ConversationService } from '../../core/services/conversation.service';
 import { Thread } from '../../core/models/thread.models';
+import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 
 /**
  * ThreadDrawerComponent
  *
  * Slide-out drawer that overlays the chat panel.
- * Displays thread list, new conversation button, and per-thread delete.
+ * Displays thread list, new conversation button, and per-thread rename/delete.
  */
 @Component({
   selector: 'app-thread-drawer',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RelativeTimePipe],
   template: `
     @if (isOpen()) {
       <!-- Backdrop -->
@@ -62,7 +63,6 @@ import { Thread } from '../../core/models/thread.models';
         <!-- Thread list -->
         <div class="flex-1 min-h-0 overflow-y-auto">
           @if (conversation.isLoadingHistory()) {
-            <!-- Loading skeleton -->
             @for (i of [1, 2, 3, 4]; track i) {
               <div class="px-4 py-3 border-b border-gray-50">
                 <div class="h-4 bg-gray-200 rounded animate-pulse w-3/4 mb-2"></div>
@@ -83,7 +83,6 @@ import { Thread } from '../../core/models/thread.models';
                 (click)="onSelectThread(thread)">
                 <div class="flex-1 min-w-0">
                   @if (editingThreadId() === thread.id) {
-                    <!-- Inline title edit -->
                     <input
                       #editInput
                       type="text"
@@ -101,7 +100,7 @@ import { Thread } from '../../core/models/thread.models';
                     </p>
                   }
                   <p class="text-xs text-gray-400 mt-0.5">
-                    {{ formatDate(thread.updated_at) }}
+                    {{ thread.updated_at | relativeTime }}
                   </p>
                 </div>
                 <!-- Edit button -->
@@ -160,9 +159,7 @@ export class ThreadDrawerComponent {
   }
 
   async onSelectThread(thread: Thread): Promise<void> {
-    // Don't navigate if we're editing this thread's title
     if (this.editingThreadId() === thread.id) return;
-
     if (thread.id === this.conversation.activeThreadId()) {
       this.close();
       return;
@@ -175,12 +172,10 @@ export class ThreadDrawerComponent {
     event.stopPropagation();
     this.editingThreadId.set(thread.id);
     this.editingTitle.set(thread.title || '');
-    // Focus the input after Angular renders it
     setTimeout(() => this.editInputRef?.nativeElement.focus(), 0);
   }
 
   async saveTitle(thread: Thread): Promise<void> {
-    // Guard against double-fire: Enter key removes the input, which triggers blur
     if (this.editingThreadId() === null) return;
     const newTitle = this.editingTitle().trim();
     this.editingThreadId.set(null);
@@ -196,21 +191,5 @@ export class ThreadDrawerComponent {
   async onDeleteThread(event: Event, thread: Thread): Promise<void> {
     event.stopPropagation();
     await this.conversation.deleteThread(thread.id);
-  }
-
-  formatDate(isoString: string): string {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60_000);
-    const diffHours = Math.floor(diffMs / 3_600_000);
-    const diffDays = Math.floor(diffMs / 86_400_000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
   }
 }

@@ -23,7 +23,7 @@ export function provideA2UICatalog(): EnvironmentProviders {
 
     // RAG Status Indicator Component
     RAGIndicator: () =>
-      import('./status/rag-indicator.component').then((m) => m.RAGIndicatorComponent),
+      import('./status/rag-indicator.component').then((m) => m.RagIndicatorComponent),
 
     // Insight Card Component
     InsightCard: () =>

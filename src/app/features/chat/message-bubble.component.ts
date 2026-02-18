@@ -1,18 +1,16 @@
-import { Component, ChangeDetectionStrategy, Input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { ChatMessage } from '../../core/models/chat.models';
 import { RelativeTimePipe } from '../../shared/pipes/relative-time.pipe';
 import { TypingIndicatorComponent } from './typing-indicator.component';
-import { ChartThumbnailComponent } from './chart-thumbnail.component';
 
 /**
  * MessageBubbleComponent
  *
  * Displays a single chat message (user or assistant).
- * Features:
  * - User messages: right-aligned, simple
- * - Assistant messages: left-aligned, markdown, chart thumbnails, tool transparency
+ * - Assistant messages: left-aligned, markdown, tool transparency
  * - Streaming support with typing indicator
  */
 @Component({
@@ -24,10 +22,9 @@ import { ChartThumbnailComponent } from './chart-thumbnail.component';
     MarkdownModule,
     RelativeTimePipe,
     TypingIndicatorComponent,
-    ChartThumbnailComponent,
   ],
   template: `
-    <div [class]="bubbleClasses()" class="animate-slideIn">
+    <div class="mb-6 animate-slideIn">
       @if (message.role === 'user') {
         <!-- User message: right-aligned with avatar -->
         <div class="flex justify-end items-start gap-3 group">
@@ -53,24 +50,14 @@ import { ChartThumbnailComponent } from './chart-thumbnail.component';
           </div>
           <div class="bg-white rounded-2xl px-5 py-4 max-w-3xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200">
             @if (message.isStreaming && !message.content) {
-              <!-- Typing indicator for streaming -->
               <app-typing-indicator />
             } @else {
-              <!-- Markdown content with better typography -->
               <div class="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-code:text-purple-600 prose-code:bg-purple-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-900 prose-pre:shadow-inner">
                 <markdown [data]="message.content"></markdown>
               </div>
             }
 
-            <!-- Chart thumbnail if present -->
-            @if (message.a2uiPayload) {
-              <app-chart-thumbnail
-                [surface]="message.a2uiPayload"
-                [title]="extractChartTitle()"
-                (viewOnCanvas)="onViewCanvas.emit()" />
-            }
-
-            <!-- Tool call transparency (collapsible with better styling) -->
+            <!-- Tool call transparency (collapsible) -->
             @if (message.toolCalls && message.toolCalls.length > 0) {
               <details class="mt-4 border-t border-gray-100 pt-3 group/details">
                 <summary
@@ -133,20 +120,4 @@ import { ChartThumbnailComponent } from './chart-thumbnail.component';
 })
 export class MessageBubbleComponent {
   @Input({ required: true }) message!: ChatMessage;
-
-  readonly onViewCanvas = output<void>();
-
-  protected bubbleClasses(): string {
-    return 'mb-6 animate-slideIn';
-  }
-
-  protected extractChartTitle(): string {
-    if (!this.message.a2uiPayload) return 'Visualization';
-
-    const rootNode = this.message.a2uiPayload.nodes.find(
-      (n) => n.id === this.message.a2uiPayload!.rootNodeId
-    );
-
-    return rootNode?.props?.['title'] || 'Visualization';
-  }
 }

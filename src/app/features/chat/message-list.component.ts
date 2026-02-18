@@ -3,16 +3,11 @@ import { CommonModule } from '@angular/common';
 import { ChatStateService } from '../../core/services/chat-state.service';
 import { AutoScrollDirective } from '../../shared/directives/auto-scroll.directive';
 import { MessageBubbleComponent } from './message-bubble.component';
-import { ChatMessage } from '../../core/models/chat.models';
 
 /**
  * MessageListComponent
  *
  * Displays the list of chat messages with auto-scroll behavior.
- * Features:
- * - Auto-scroll to bottom when new messages arrive
- * - Virtual scroll for performance (future enhancement)
- * - Empty state when no messages
  */
 @Component({
   selector: 'app-message-list',
@@ -23,7 +18,7 @@ import { ChatMessage } from '../../core/models/chat.models';
     <div class="h-full overflow-y-auto px-6 py-8 bg-gradient-to-b from-gray-50 to-white" appAutoScroll>
       <div class="max-w-4xl mx-auto">
         @if (!hasMessages()) {
-          <!-- Empty state with modern design -->
+          <!-- Empty state -->
           <div class="h-full min-h-[400px] flex items-center justify-center text-gray-500">
             <div class="text-center animate-fadeIn">
               <div class="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-6 shadow-lg">
@@ -44,10 +39,9 @@ import { ChatMessage } from '../../core/models/chat.models';
             </div>
           </div>
         } @else {
-          <!-- Message list -->
           <div class="space-y-4">
             @for (message of messages(); track message.id) {
-              <app-message-bubble [message]="message" (onViewCanvas)="handleViewCanvas(message)" />
+              <app-message-bubble [message]="message" />
             }
           </div>
         }
@@ -56,20 +50,7 @@ import { ChatMessage } from '../../core/models/chat.models';
   `,
 })
 export class MessageListComponent {
-  protected chatState = inject(ChatStateService);
-
-  // Direct signal reference - NOT a copy
+  private chatState = inject(ChatStateService);
   protected readonly messages = this.chatState.messages;
-
-  // Computed signal for empty check
   protected readonly hasMessages = computed(() => this.messages().length > 0);
-
-  /**
-   * Handle chart thumbnail click - update canvas with visualization
-   */
-  protected handleViewCanvas(_message: ChatMessage): void {
-    // TODO: Re-display cached surface when clicking chat thumbnail.
-    // Requires storing surfaceId on ChatMessage and calling
-    // a2uiEventService.currentSurfaceId.set(surfaceId).
-  }
 }
