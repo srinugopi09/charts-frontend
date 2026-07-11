@@ -438,25 +438,86 @@ func TestVersionJSON(t *testing.T) {
 	}
 }
 
+// rejectServerSideSort mirrors live Rally: TypeDefinition and
+// AttributeDefinition queries fail on any `order` param with an error inside
+// an HTTP 200 body. Regression guard for the "Cannot sort using attribute
+// ElementName" bug found in live testing.
+func rejectServerSideSort(t *testing.T, w http.ResponseWriter, r *http.Request) bool {
+	t.Helper()
+	if order := r.URL.Query().Get("order"); order != "" {
+		fmt.Fprintf(w, `{"QueryResult":{"TotalResultCount":0,"Results":[],"Errors":["Cannot sort using attribute %s"],"Warnings":[]}}`,
+			strings.Fields(order)[0])
+		return true
+	}
+	return false
+}
+
 func TestSchemaAttributes(t *testing.T) {
 	srv := testServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if rejectServerSideSort(t, w, r) {
+			return
+		}
 		switch {
 		case strings.HasSuffix(r.URL.Path, "/typedefinition"):
 			fmt.Fprintf(w, `{"QueryResult":{"TotalResultCount":1,"StartIndex":1,"PageSize":2,"Results":[{"ElementName":"Defect","Attributes":{"_ref":"%s/typedefinition/1/Attributes","Count":2}}],"Errors":[],"Warnings":[]}}`, "http://"+r.Host)
 		case strings.HasSuffix(r.URL.Path, "/Attributes"):
+			// served deliberately unsorted: the CLI must sort client-side
 			fmt.Fprint(w, `{"QueryResult":{"TotalResultCount":2,"StartIndex":1,"PageSize":200,"Results":[
-			  {"ElementName":"State","AttributeType":"RATING","Required":true,"ReadOnly":false,"Constrained":true,"Custom":false},
-			  {"ElementName":"c_TeamKanban","AttributeType":"STRING","Required":false,"ReadOnly":false,"Constrained":false,"Custom":true}
+			  {"ElementName":"c_TeamKanban","AttributeType":"STRING","Required":false,"ReadOnly":false,"Constrained":false,"Custom":true},
+			  {"ElementName":"State","AttributeType":"RATING","Required":true,"ReadOnly":false,"Constrained":true,"Custom":false}
 			],"Errors":[],"Warnings":[]}}`)
 		default:
 			t.Errorf("unexpected path %s", r.URL.Path)
 		}
 	})
-	stdout, _, code := run(t, "schema", "defect", "--api-key", "k", "--base-url", srv.URL, "-o", "json")
+	stdout, stderr, code := run(t, "schema", "defect", "--api-key", "k", "--base-url", srv.URL, "-o", "json")
 	if code != ExitOK {
-		t.Fatalf("exit = %d", code)
+		t.Fatalf("exit = %d, stderr = %s", code, stderr)
 	}
 	if !strings.Contains(stdout, "c_TeamKanban") || !strings.Contains(stdout, `"State"`) {
 		t.Errorf("schema output = %s", stdout)
+	}
+	if strings.Index(stdout, `"State"`) > strings.Index(stdout, "c_TeamKanban") {
+		t.Errorf("attributes should be sorted by ElementName (State before c_TeamKanban): %s", stdout)
+	}
+}
+
+func TestSchemaTypeListSortedClientSide(t *testing.T) {
+	srv := testServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if rejectServerSideSort(t, w, r) {
+			return
+		}
+		// unsorted on purpose
+		fmt.Fprint(w, `{"QueryResult":{"TotalResultCount":2,"StartIndex":1,"PageSize":200,"Results":[
+		  {"ElementName":"Defect","TypePath":"Defect","Name":"Defect"},
+		  {"ElementName":"Artifact","TypePath":"Artifact","Name":"Artifact"}
+		],"Errors":[],"Warnings":[]}}`)
+	})
+	stdout, stderr, code := run(t, "schema", "--api-key", "k", "--base-url", srv.URL, "-o", "json")
+	if code != ExitOK {
+		t.Fatalf("exit = %d, stderr = %s", code, stderr)
+	}
+	if strings.Index(stdout, "Artifact") > strings.Index(stdout, "Defect") {
+		t.Errorf("types should be sorted by ElementName: %s", stdout)
+	}
+}
+
+func TestGetCollectionUnknownTypeSendsNoOrder(t *testing.T) {
+	srv := testServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/Discussion") {
+			if order := r.URL.Query().Get("order"); order != "" {
+				t.Errorf("unknown collection element type must not send order, got %q", order)
+			}
+			fmt.Fprint(w, `{"QueryResult":{"TotalResultCount":2,"StartIndex":1,"PageSize":200,"Results":[{"ObjectID":22,"Name":"second"},{"ObjectID":11,"Name":"first"}],"Errors":[],"Warnings":[]}}`)
+			return
+		}
+		fmt.Fprintf(w, `{"QueryResult":{"TotalResultCount":1,"StartIndex":1,"PageSize":2,"Results":[{"FormattedID":"US1","Name":"story","Discussion":{"_ref":"%s/hierarchicalrequirement/7/Discussion","Count":2}}],"Errors":[],"Warnings":[]}}`, "http://"+r.Host)
+	})
+	stdout, stderr, code := run(t, "get", "US1", "--api-key", "k", "--base-url", srv.URL, "--collection", "Discussion", "-o", "json")
+	if code != ExitOK {
+		t.Fatalf("exit = %d, stderr = %s", code, stderr)
+	}
+	if strings.Index(stdout, `"first"`) > strings.Index(stdout, `"second"`) {
+		t.Errorf("unknown collections should be sorted client-side by ObjectID: %s", stdout)
 	}
 }

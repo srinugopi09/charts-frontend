@@ -24,6 +24,12 @@ func TestResolveType(t *testing.T) {
 	if cols := ResolveType("somethingunknown").DefaultColumns; len(cols) != len(GenericColumns) {
 		t.Errorf("unknown type should get generic columns, got %v", cols)
 	}
+	if !ResolveType("defect").Known {
+		t.Error("registry types must be Known")
+	}
+	if ResolveType("somethingunknown").Known {
+		t.Error("passthrough types must not be Known")
+	}
 }
 
 func TestParseFormattedID(t *testing.T) {

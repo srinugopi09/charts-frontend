@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -51,14 +52,16 @@ func (a *app) runSchemaTypes(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	// No server-side Order here: Rally rejects sorting TypeDefinition by
+	// ElementName ("Cannot sort using attribute ElementName"); sort locally.
 	results, total, err := client.QueryAll(ctx, "typedefinition", rally.QueryParams{
 		Fetch:     strings.Join(typeListColumns, ","),
-		Order:     "ElementName ASC",
 		Workspace: workspace,
 	}, 0, a.maxRequests)
 	if err != nil {
 		return err
 	}
+	sortRawByField(results, "ElementName")
 	return a.renderResults(results, total, typeListColumns)
 }
 
@@ -102,9 +105,9 @@ func (a *app) runSchemaAttributes(ctx context.Context, typeName string, withValu
 		return fmt.Errorf("type definition for %s has no attributes collection", typeName)
 	}
 
+	// No server-side Order: AttributeDefinition rejects it too; sort locally.
 	attrs, err := client.QueryURL(ctx, typeDef.Attributes.Ref, rally.QueryParams{
 		Fetch:    strings.Join(attributeColumns, ",") + ",AllowedValues",
-		Order:    "ElementName ASC",
 		PageSize: rally.MaxPageSize,
 	})
 	if err != nil {
@@ -113,6 +116,7 @@ func (a *app) runSchemaAttributes(ctx context.Context, typeName string, withValu
 	a.warn(attrs.Warnings)
 
 	results := attrs.Results
+	sortRawByField(results, "ElementName")
 	columns := attributeColumns
 	if withValues {
 		results, err = a.attachAllowedValues(ctx, client, results)
@@ -164,6 +168,33 @@ func (a *app) attachAllowedValues(ctx context.Context, client *rally.Client, att
 		out[i] = rebuilt
 	}
 	return out, nil
+}
+
+// sortRawByField orders results client-side by one field. Used where Rally
+// rejects server-side sorting (e.g. ElementName on TypeDefinition /
+// AttributeDefinition) but the CLI still guarantees deterministic output.
+func sortRawByField(results []json.RawMessage, field string) {
+	type keyed struct {
+		key string
+		raw json.RawMessage
+	}
+	pairs := make([]keyed, len(results))
+	for i, raw := range results {
+		var obj map[string]any
+		if err := json.Unmarshal(raw, &obj); err == nil {
+			switch v := obj[field].(type) {
+			case string:
+				pairs[i].key = v
+			case float64:
+				pairs[i].key = fmt.Sprintf("%020.0f", v) // zero-pad: lexical == numeric
+			}
+		}
+		pairs[i].raw = raw
+	}
+	sort.SliceStable(pairs, func(i, j int) bool { return pairs[i].key < pairs[j].key })
+	for i := range pairs {
+		results[i] = pairs[i].raw
+	}
 }
 
 // renderResults is the shared result renderer for schema commands.

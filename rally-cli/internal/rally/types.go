@@ -16,6 +16,13 @@ type TypeInfo struct {
 	Prefixes       []string // FormattedID prefixes, e.g. "US"
 	DefaultColumns []string
 	HasFormattedID bool
+	Known          bool // true for curated registry entries; false for passthrough guesses
+}
+
+func init() {
+	for i := range Registry {
+		Registry[i].Known = true
+	}
 }
 
 // Registry lists the everyday Rally types. Unknown types still work through

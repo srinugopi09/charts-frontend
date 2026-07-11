@@ -188,15 +188,25 @@ func (a *app) renderCollection(ctx context.Context, client *rally.Client, obj js
 	elemType := rally.ResolveType(strings.TrimSuffix(strings.ToLower(collection), "s"))
 	columns := elemType.DefaultColumns
 
-	qr, err := client.QueryURL(ctx, collRef.Ref, rally.QueryParams{
+	params := rally.QueryParams{
 		Fetch:    strings.Join(columns, ","),
 		PageSize: rally.MaxPageSize,
-		Order:    elemType.DefaultOrder(),
-	})
+	}
+	// Only registry types get a server-side Order — Rally rejects sorting on
+	// attributes the element type doesn't have (e.g. FormattedID on
+	// ConversationPost), and for guessed types we can't know. Sort locally
+	// instead for those.
+	if elemType.Known {
+		params.Order = elemType.DefaultOrder()
+	}
+	qr, err := client.QueryURL(ctx, collRef.Ref, params)
 	if err != nil {
 		return err
 	}
 	a.warn(qr.Warnings)
+	if !elemType.Known {
+		sortRawByField(qr.Results, "ObjectID")
+	}
 
 	opts := a.renderOpts(columns)
 	switch a.format {
